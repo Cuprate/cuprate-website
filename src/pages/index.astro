@@ -1,0 +1,76 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+		    <div class="cuprate">
+				<img src="/CuprateLogoComplex.svg" alt="">
+				<h1>
+					Cuprate
+				</h1>
+				<h2>
+					An upcoming experimental, modern &amp; secure monero node</h2>
+
+				<p style="margin-top: 4rem">
+					Discover the documentation of our rust-written project, as well as documentation on monerod and the
+					monero protocol.
+				</p>
+				
+				<p style="margin-top: 4rem; color: #60739f">
+				    Documentation coming soon...
+				</p>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
+<style>
+    .cuprate img {
+        position: relative;
+        width: 60%;
+        display: block;
+        left: 1rem;
+        margin-top: 2rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .cuprate {
+        text-align: center;
+    }
+	.cuprate h1 {
+		margin-left: auto;
+		margin-right: auto;
+		width: min-content;
+		font-weight: 800;
+		color: transparent;
+		font-size: 3.75rem;
+		background-image: linear-gradient(to right, #2f4beb, #1e3096);
+		background-clip: text;
+	}
+	.cuprate h2 {
+		margin-left: auto;
+		margin-right: auto;
+		font-weight: 800;
+		color: transparent;
+		font-size: 2rem;
+		line-height: 2rem;
+		background-image: linear-gradient(to right, #2f4beb, #ffffff);
+		background-clip: text;
+	}
+    @media (min-width: 640px) {
+        .cuprate img {
+            width: 20rem;
+            left: 1.75rem;
+        }
+    }
+</style>
