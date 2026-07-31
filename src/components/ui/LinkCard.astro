@@ -8,22 +8,24 @@ interface Props {
 }
 
 const { title, description, href, badge, disabled = false } = Astro.props;
-const Tag = disabled || !href ? "div" : "a";
+const Tag = href ? "a" : "div";
 ---
 
 <Tag
-	class:list={["link-card", { "link-card--disabled": disabled || !href }]}
+	class:list={["link-card", { "link-card--disabled": disabled }]}
 	href={!disabled && href ? href : undefined}
 	target={!disabled && href?.startsWith("http") ? "_blank" : undefined}
 	rel={!disabled && href?.startsWith("http") ? "noopener" : undefined}
 >
 	<div class="link-card__body">
 		<div class="link-card__heading">
-			{Astro.slots.has("icon") && (
-				<span class="link-card__icon">
-					<slot name="icon" />
-				</span>
-			)}
+			{
+				Astro.slots.has("icon") && (
+					<span class="link-card__icon">
+						<slot name="icon" />
+					</span>
+				)
+			}
 			<h3 class="link-card__title">{title}</h3>
 			{badge && <span class="link-card__badge">{badge}</span>}
 		</div>

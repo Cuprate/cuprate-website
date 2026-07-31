@@ -2,188 +2,180 @@
 import ChessboardDivider from "../ui/ChessboardDivider.astro";
 
 interface Props {
-    /** Background color of the section above the footer. */
-    from?: string;
+	/** Background color of the section above the footer. */
+	from?: string;
 }
 
 const { from = "#0d1117" } = Astro.props;
 const today = new Date();
 
 const columns = [
-    {
-        title: "Documentation",
-        links: [
-            { name: "User book", href: "https://user.cuprate.org" },
-            {
-                name: "Architecture book",
-                href: "https://architecture.cuprate.org",
-            },
-        ],
-    },
-    {
-        title: "Project",
-        links: [
-            { name: "Repository", href: "https://github.com/Cuprate/cuprate" },
-            {
-                name: "Contributors",
-                href: "https://github.com/Cuprate/cuprate/graphs/contributors",
-            },
+	{
+		title: "Documentation",
+		links: [
+			{ name: "User book", href: "https://user.cuprate.org" },
+			{
+				name: "Architecture book",
+				href: "https://architecture.cuprate.org",
+			},
+			{
+				name: "Crates documentation",
+				href: "https://doc.cuprate.org",
+			},
+		],
+	},
+	{
+		title: "Project",
+		links: [
+			{ name: "Repository", href: "https://github.com/Cuprate/cuprate" },
+			{
+				name: "Contributors",
+				href: "https://github.com/Cuprate/cuprate/graphs/contributors",
+			},
 			{ name: "Blog", href: "/blog" },
 			{ name: "Releases", href: "/releases" },
-        ],
-    },
-    {
-        title: "Community",
-        links: [
-            {
-                name: "Matrix - #cuprate:monero.social",
-                href: "https://matrix.to/#/#cuprate:monero.social",
-            },
-            {
-                name: "IRC - Libera.Chat",
-                href: "https://web.libera.chat/#cuprate",
-            },
-            { name: "RSS feed", href: "/rss.xml" },
-        ],
-    },
+		],
+	},
+	{
+		title: "Community",
+		links: [
+			{
+				name: "Matrix - #cuprate:monero.social",
+				href: "https://matrix.to/#/#cuprate:monero.social",
+			},
+			{
+				name: "IRC - Libera.Chat",
+				href: "https://web.libera.chat/#cuprate",
+			},
+			{ name: "RSS feed", href: "/rss.xml" },
+		],
+	},
 ];
 ---
 
 <ChessboardDivider from={from} to="#010409" />
 <footer>
-    <div class="footer__inner">
-        <div class="footer__brand">
-            <img src="/CuprateLogoWhite.svg" alt="" />
-            <p>A modular Monero node written in Rust</p>
-        </div>
-        {
-            columns.map((col) => (
-                <div class="footer__col">
-                    <h3 class="footer__heading">{col.title}</h3>
-                    <ul>
-                        {col.links.map((link) => (
-                            <li>
-                                <a
-                                    href={link.href}
-                                    target={
-                                        link.href.startsWith("http")
-                                            ? "_blank"
-                                            : undefined
-                                    }
-
-                                    rel={
-                                        link.href.startsWith("http")
-                                            ? "noopener"
-                                            : undefined
-                                    }
-
-                                >
-                                    {link.name}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            ))
-        }
-
-    </div>
-    <div class="footer__bottom">
-        <span
-            >&copy; {today.getFullYear()} Cuprate Contributors. All rights
-            reserved.</span
-        >
-        <span class="footer__egg">nioc's cat sometimes pass around here</span>
-    </div>
+	<div class="footer__inner">
+		<div class="footer__brand">
+			<img src="/CuprateLogoWhite.svg" alt="" />
+			<p>A modular Monero node written in Rust</p>
+		</div>
+		{
+			columns.map((col) => (
+				<div class="footer__col">
+					<h3 class="footer__heading">{col.title}</h3>
+					<ul>
+						{col.links.map((link) => (
+							<li>
+								<a
+									href={link.href}
+									target={link.href.startsWith("http") ? "_blank" : undefined}
+									rel={link.href.startsWith("http") ? "noopener" : undefined}
+								>
+									{link.name}
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			))
+		}
+	</div>
+	<div class="footer__bottom">
+		<span
+			>&copy; {today.getFullYear()} Cuprate Contributors. All rights reserved.</span
+		>
+		<span class="footer__egg">nioc's cat sometimes pass around here</span>
+	</div>
 </footer>
 
 <style>
-    footer {
-        background: #010409;
-        color: rgb(var(--gray));
-    }
+	footer {
+		background: #010409;
+		color: rgb(var(--gray));
+	}
 
-    .footer__inner {
-        display: grid;
+	.footer__inner {
+		display: grid;
 		grid-template-columns: 1.5fr 0.8fr 0.8fr 1.4fr;
-        gap: 2.5rem;
-        width: 90vw;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 3.5rem 1rem 2.5rem;
-    }
+		gap: 2.5rem;
+		width: 90vw;
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 3.5rem 1rem 2.5rem;
+	}
 
-    .footer__brand img {
-        display: block;
-        height: 2.5rem;
-        margin-bottom: 1.25rem;
-    }
+	.footer__brand img {
+		display: block;
+		height: 2.5rem;
+		margin-bottom: 1.25rem;
+	}
 
-    .footer__brand p {
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin: 0;
-        max-width: 18rem;
-    }
+	.footer__brand p {
+		font-size: 0.95rem;
+		line-height: 1.6;
+		margin: 0;
+		max-width: 18rem;
+	}
 
-    .footer__heading {
-        font-family: "Atkinson", sans-serif;
-        font-weight: 700;
-        font-size: 0.7rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: #7d9bff;
-        margin: 0 0 1.25rem;
-    }
+	.footer__heading {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 0.7rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: #7d9bff;
+		margin: 0 0 1.25rem;
+	}
 
-    .footer__col ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
+	.footer__col ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
 
-    .footer__col a {
-        font-size: 0.95rem;
-        text-decoration: none;
-        color: rgb(var(--gray));
-        transition: color 100ms steps(2);
-    }
+	.footer__col a {
+		font-size: 0.95rem;
+		text-decoration: none;
+		color: rgb(var(--gray));
+		transition: color 100ms steps(2);
+	}
 
-    .footer__col a:hover {
-        color: #7d9bff;
-    }
+	.footer__col a:hover {
+		color: #7d9bff;
+	}
 
-    .footer__bottom {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        flex-wrap: wrap;
-        gap: 0.5rem 2rem;
-        width: 90vw;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 1.5rem 1rem 3rem;
-        border-top: 1px dashed rgb(34, 41, 57);
-        font-size: 0.85rem;
-    }
+	.footer__bottom {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.5rem 2rem;
+		width: 90vw;
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 1.5rem 1rem 3rem;
+		border-top: 1px dashed rgb(34, 41, 57);
+		font-size: 0.85rem;
+	}
 
-    .footer__egg {
-        font-size: 0.8rem;
-        color: rgb(34, 41, 57);
-    }
+	.footer__egg {
+		font-size: 0.8rem;
+		color: rgb(34, 41, 57);
+	}
 
-    @media (max-width: 860px) {
-        .footer__inner {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
+	@media (max-width: 860px) {
+		.footer__inner {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
 
-    @media (max-width: 560px) {
-        .footer__inner {
-            grid-template-columns: 1fr;
-        }
-    }
+	@media (max-width: 560px) {
+		.footer__inner {
+			grid-template-columns: 1fr;
+		}
+	}
 </style>

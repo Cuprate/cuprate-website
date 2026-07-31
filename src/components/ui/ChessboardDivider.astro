@@ -17,7 +17,7 @@ const { from, to, rows = 2 } = Astro.props;
 	aria-hidden="true"
 >
 	<div class="chessboard__row"></div>
-	{rows >= 2 && <div class="chessboard__row chessboard__row--offset"></div>}
+	{rows >= 2 && <div class="chessboard__row chessboard__row--offset" />}
 </div>
 
 <style>
