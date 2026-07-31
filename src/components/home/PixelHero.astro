@@ -1,0 +1,131 @@
+---
+import PixelButton from "../ui/PixelButton.astro";
+
+interface Props {
+	docsHref?: string;
+}
+
+const { docsHref = "https://user.cuprate.org" } = Astro.props;
+---
+
+<section class="hero">
+	<div class="hero__inner">
+		<div class="hero__copy">
+			<span class="hero__badge">Beta soon</span>
+			<h1 class="hero__title">Cuprate</h1>
+			<p class="hero__tagline">
+				A modular <a
+					class="hero__monero"
+					href="https://getmonero.org"
+					target="_blank"
+					rel="noopener">Monero</a
+				> node written in <span class="hero__rust">&lt;Rust&gt;</span>
+			</p>
+			<div class="hero__cta">
+				<PixelButton href={docsHref}>Read the Docs</PixelButton>
+				<PixelButton variant="ghost" badge="We want it as much as you" disabled>
+					Download
+				</PixelButton>
+			</div>
+		</div>
+		<div class="hero__art" aria-hidden="true">
+			<img src="/CuprateLogoComplex.svg" alt="" />
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		padding: 4rem 1rem 5rem;
+	}
+
+	.hero__inner {
+		display: grid;
+		grid-template-columns: 1.2fr 1fr;
+		align-items: center;
+		gap: 1.5rem;
+		width: 90vw;
+		max-width: 1100px;
+		margin: 0 auto;
+	}
+
+	.hero__badge {
+		display: inline-block;
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 0.7rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: #e6edf3;
+		background: #1e56cf;
+		padding: 0.5em 0.9em;
+		box-shadow: 4px 4px 0 #000d8a;
+		margin-bottom: 2rem;
+	}
+
+	.hero__title {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: clamp(2.75rem, 6vw, 4.5rem);
+		letter-spacing: 0.02em;
+		line-height: 1.1;
+		margin: 0 0 1.5rem;
+		color: transparent;
+		background-image: linear-gradient(to right, #2f4beb, #7d9bff);
+		background-clip: text;
+		-webkit-background-clip: text;
+	}
+
+	.hero__tagline {
+		font-size: 1.25rem;
+		line-height: 1.6;
+		color: rgb(var(--gray));
+		max-width: 34rem;
+		margin: 0 0 2.5rem;
+	}
+
+	.hero__rust {
+		color: #e6edf3;
+		font-weight: 700;
+	}
+
+	.hero__monero {
+		color: #e89a75;
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.hero__monero:hover {
+		text-decoration: underline;
+	}
+
+	.hero__cta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.25rem;
+	}
+
+	.hero__art {
+		display: flex;
+		justify-content: center;
+	}
+
+	.hero__art img {
+		width: min(100%, 23rem);
+		height: auto;
+	}
+
+	@media (max-width: 860px) {
+		.hero__inner {
+			grid-template-columns: 1fr;
+		}
+
+		.hero__art {
+			order: -1;
+		}
+
+		.hero__art img {
+			width: min(65vw, 16rem);
+		}
+	}
+</style>

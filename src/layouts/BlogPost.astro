@@ -1,11 +1,17 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
+import BaseHead from '../components/layout/BaseHead.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import FormattedDate from '../components/layout/FormattedDate.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface Props {
+	title: string;
+	description: string;
+	pubDate?: Date;
+	updatedDate?: Date;
+	heroImage?: string;
+	type?: string;
+}
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
@@ -13,45 +19,6 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 <html lang="en">
 	<head>
 		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 960px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: #a5bed6;
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
 	</head>
 
 	<body>
@@ -62,17 +29,35 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 					{heroImage && <img width={960} height={510} src={heroImage} alt="" />}
 				</div>
 				<div class="prose">
+					{
+						pubDate && (
+							<a class="arrow-link" href="/blog">
+								<span class="arrow-link__arrow" aria-hidden="true">
+									&lt;-
+								</span>
+								Back to blog
+							</a>
+						)
+					}
 					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
+						{
+							pubDate && (
+								<div>
+									<span class="date-chip">
+										<span class="date-chip__prefix">Date</span>
+										<span class="date-chip__date">
+											<FormattedDate date={pubDate} />
+										</span>
+									</span>
+									{updatedDate && (
+										<div class="last-updated-on">
+											Last updated on{" "}
+											<FormattedDate date={updatedDate} />
+										</div>
+									)}
+								</div>
+							)
+						}
 						<h1>{title}</h1>
 						<hr />
 					</div>
@@ -83,3 +68,123 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<Footer />
 	</body>
 </html>
+
+<style>
+	main {
+		width: calc(100% - 2em);
+		max-width: 100%;
+		margin: 0;
+	}
+
+	.hero-image {
+		width: 100%;
+	}
+
+	.hero-image img {
+		display: block;
+		margin: 0 auto;
+	}
+
+	.back {
+		font-size: 0.8rem;
+		color: rgb(var(--gray));
+		margin-bottom: 2.5rem;
+	}
+
+	.back:hover {
+		color: #7d9bff;
+	}
+
+	.back:hover .arrow-link__arrow {
+		transform: translateX(-4px);
+	}
+
+	.prose {
+		width: 960px;
+		max-width: calc(100% - 2em);
+		margin: auto;
+		padding: 1em;
+		font-family: 'Mona', sans-serif;
+		font-size: 1.05rem;
+		line-height: 1.75;
+		color: #a5bed6;
+	}
+
+	.prose :global(h2),
+	.prose :global(h3),
+	.prose :global(h4) {
+		font-family: 'Atkinson', sans-serif;
+		letter-spacing: -0.01em;
+		color: #e6edf3;
+	}
+
+	.prose :global(a) {
+		color: #7d9bff;
+		text-decoration-color: rgba(125, 155, 255, 0.4);
+		text-underline-offset: 3px;
+	}
+
+	.prose :global(a:hover) {
+		color: #e6edf3;
+	}
+
+	.prose :global(img) {
+		border: 1px dashed rgb(34, 41, 57);
+	}
+
+	.title {
+		margin-bottom: 1em;
+		padding: 1em 0;
+		text-align: center;
+		line-height: 1;
+	}
+
+	.title h1 {
+		margin: 0 0 0.5em 0;
+		font-family: 'Atkinson', sans-serif;
+		letter-spacing: -0.01em;
+		line-height: 1.25;
+		text-shadow: none;
+	}
+
+	.title hr {
+		border: none;
+		border-top: 1px dashed rgb(34, 41, 57);
+	}
+
+	.date-chip {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0.65rem 1rem;
+		margin-bottom: 1.75rem;
+		border: 1px dashed rgb(34, 41, 57);
+		font-family: 'Atkinson', sans-serif;
+		font-weight: 700;
+		font-size: 0.9rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.date-chip__prefix {
+		font-size: 0.65rem;
+		letter-spacing: 0.18em;
+		color: #7d9bff;
+	}
+
+	.date-chip__prefix::after {
+		content: '//';
+		margin-left: 0.6rem;
+		color: rgb(34, 41, 57);
+	}
+
+	.date-chip__date {
+		color: #e6edf3;
+	}
+
+	.last-updated-on {
+		margin-top: 0.75rem;
+		font-size: 0.8rem;
+		color: rgb(var(--gray));
+	}
+</style>

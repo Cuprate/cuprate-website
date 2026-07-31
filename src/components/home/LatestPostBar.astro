@@ -1,0 +1,96 @@
+---
+import { getCollection } from "astro:content";
+import FormattedDate from "../layout/FormattedDate.astro";
+
+const posts = (await getCollection("blog")).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latest = posts[0];
+---
+
+{
+	latest && (
+		<div class="latest">
+			<a class="latest__link" href={`/blog/${latest.slug}/`}>
+				<span class="latest__label">Latest post</span>
+				<span class="latest__title">{latest.data.title}</span>
+				<span class="latest__date">
+					<FormattedDate date={latest.data.pubDate} />
+				</span>
+				<span class="latest__arrow" aria-hidden="true">
+					-&gt;
+				</span>
+			</a>
+		</div>
+	)
+}
+
+<style>
+	.latest {
+		width: 90vw;
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 0 1rem;
+	}
+
+	.latest__link {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.5rem 1rem;
+		padding: 0.85rem 0.75rem;
+		border-top: 1px dashed rgb(34, 41, 57);
+		border-bottom: 1px dashed rgb(34, 41, 57);
+		text-decoration: none;
+		transition: background 100ms steps(2);
+	}
+
+	.latest__link:hover {
+		background: rgba(30, 86, 207, 0.06);
+	}
+
+	.latest__label {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 0.7rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: #7d9bff;
+	}
+
+	.latest__label::after {
+		content: "//";
+		margin-left: 1rem;
+		color: rgb(34, 41, 57);
+	}
+
+	.latest__title {
+		font-size: 0.95rem;
+		color: #e6edf3;
+	}
+
+	.latest__link:hover .latest__title {
+		color: #7d9bff;
+	}
+
+	.latest__date {
+		font-size: 0.85rem;
+		color: rgb(var(--gray));
+	}
+
+	.latest__arrow {
+		margin-left: auto;
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 0.85rem;
+		color: rgb(var(--gray));
+		transition:
+			transform 100ms steps(2),
+			color 100ms steps(2);
+	}
+
+	.latest__link:hover .latest__arrow {
+		transform: translateX(4px);
+		color: #7d9bff;
+	}
+</style>
