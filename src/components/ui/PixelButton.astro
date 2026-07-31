@@ -1,0 +1,111 @@
+---
+interface Props {
+	href?: string;
+	variant?: "primary" | "ghost";
+	badge?: string;
+	disabled?: boolean;
+	big?: boolean;
+}
+
+const {
+	href,
+	variant = "primary",
+	badge,
+	disabled = false,
+	big = false,
+} = Astro.props;
+
+const Tag = disabled || !href ? "span" : "a";
+---
+
+<Tag
+	class:list={[
+		"pixel-btn",
+		`pixel-btn--${variant}`,
+		{ "pixel-btn--disabled": disabled, "pixel-btn--big": big },
+	]}
+	href={!disabled && href ? href : undefined}
+	target={!disabled && href?.startsWith("http") ? "_blank" : undefined}
+	rel={!disabled && href?.startsWith("http") ? "noopener" : undefined}
+>
+	<slot />
+	{badge && <span class="pixel-btn__badge">{badge}</span>}
+</Tag>
+
+<style>
+	.pixel-btn {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 0.95rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		text-decoration: none;
+		padding: 1rem 1.4rem;
+		border: 3px solid #1e56cf;
+		transition:
+			transform 80ms steps(2),
+			box-shadow 80ms steps(2);
+	}
+
+	.pixel-btn--big {
+		font-size: 1.1rem;
+		padding: 1.25rem 2rem;
+	}
+
+	.pixel-btn--primary {
+		background: #1e56cf;
+		color: #e6edf3;
+		box-shadow: 6px 6px 0 #000d8a;
+	}
+
+	.pixel-btn--ghost {
+		background: transparent;
+		color: #7d9bff;
+		box-shadow: 6px 6px 0 #000d8a;
+	}
+
+	.pixel-btn:hover {
+		transform: translate(-2px, -2px);
+	}
+
+	.pixel-btn--primary:hover {
+		box-shadow: 8px 8px 0 #000d8a;
+		color: #ffffff;
+	}
+
+	.pixel-btn--ghost:hover {
+		box-shadow: 8px 8px 0 #000d8a;
+		color: #e6edf3;
+	}
+
+	.pixel-btn:active {
+		transform: translate(4px, 4px);
+		box-shadow: 2px 2px 0 #000d8a;
+	}
+
+	.pixel-btn--disabled,
+	.pixel-btn--disabled:hover {
+		cursor: not-allowed;
+		opacity: 0.55;
+		transform: none;
+		box-shadow: 6px 6px 0 #000d8a;
+	}
+
+	.pixel-btn__badge {
+		font-size: 0.45rem;
+		letter-spacing: 0.14em;
+		white-space: nowrap;
+		color: #0d1117;
+		background: #7d9bff;
+		padding: 0.4em 0.7em;
+		margin-left: 0.6rem;
+		box-shadow: 3px 3px 0 #1e56cf;
+	}
+
+	.pixel-btn--big .pixel-btn__badge {
+		font-size: 0.55rem;
+	}
+</style>

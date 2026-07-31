@@ -1,0 +1,86 @@
+---
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<div class="feature-card">
+	<div class="feature-card__icon">
+		<slot name="icon" />
+	</div>
+	<h3 class="feature-card__title">{title}</h3>
+	<p class="feature-card__description">{description}</p>
+</div>
+
+<style>
+	.feature-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		background: #010409;
+		border: 3px solid rgb(34, 41, 57);
+		padding: 2rem;
+		transition:
+			transform 100ms steps(3),
+			box-shadow 100ms steps(3),
+			border-color 100ms steps(3);
+	}
+
+	.feature-card:hover {
+		transform: translate(-4px, -4px);
+		border-color: #1e56cf;
+		box-shadow: 8px 8px 0 #1e56cf;
+	}
+
+	.feature-card__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 3.25rem;
+		height: 3.25rem;
+		border: 3px solid #1e56cf;
+		background: #0d1117;
+		color: #7d9bff;
+		box-shadow: 4px 4px 0 rgba(30, 86, 207, 0.35);
+	}
+
+	.feature-card__icon :global(svg) {
+		width: 1.6rem;
+		height: 1.6rem;
+	}
+
+	.feature-card__icon :global(.icon-mask) {
+		width: 1.6rem;
+		height: 1.6rem;
+		background-color: currentColor;
+		mask-image: var(--icon);
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+		-webkit-mask-image: var(--icon);
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+	}
+
+	.feature-card__title {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 1.15rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		line-height: 1.4;
+		color: #e6edf3;
+		margin: 0;
+	}
+
+	.feature-card__description {
+		font-size: 1.05rem;
+		line-height: 1.6;
+		color: rgb(var(--gray));
+		margin: 0;
+	}
+</style>

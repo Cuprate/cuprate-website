@@ -1,0 +1,258 @@
+---
+import ChessboardDivider from "../ui/ChessboardDivider.astro";
+import snapshot from "../../data/contributors.json";
+
+interface Contributor {
+    login: string;
+    avatar_url: string;
+    html_url: string;
+    type?: string;
+}
+
+let contributors: Contributor[] = [];
+try {
+    const res = await fetch(
+        "https://api.github.com/repos/Cuprate/cuprate/contributors?per_page=24",
+    );
+    if (res.ok) {
+        const data: Contributor[] = await res.json();
+        contributors = data.filter((c) => c.type === "User").slice(0, 12);
+    }
+} catch {
+    // Network unavailable; fall back to the bundled snapshot below.
+}
+
+if (contributors.length === 0) {
+    contributors = snapshot.map((c: { login: string }) => ({
+        login: c.login,
+        avatar_url: `https://github.com/${c.login}.png`,
+        html_url: `https://github.com/${c.login}`,
+    }));
+}
+---
+
+<ChessboardDivider from="#0d1117" to="#070c12" rows={1} />
+<div class="contributors-band">
+    <div class="contributors-band__inner">
+        <h2 class="contributors__title">Contributors</h2>
+        <p class="contributors__dedication">
+            Cuprate is free and open-source software, built and maintained by a
+            dedicated community of volunteers. This project exists thanks to
+            everyone who contributes code, reviews, documentation and ideas, and
+            thanks to every donor of the different CCS initiatives for financing
+            Cuprate development.
+        </p>
+
+        {
+            contributors.length > 0 ? (
+                <>
+                    <ul class="contributors__grid">
+                        {contributors.map((c) => (
+                            <li>
+                                <a
+                                    class:list={[
+                                        "contributors__card",
+                                        {
+                                            "contributors__card--glow":
+                                                c.login === "kayabaNerve",
+                                        },
+                                    ]}
+                                    href={c.html_url}
+                                    target="_blank"
+                                    rel="noopener"
+                                    title={c.login}
+                                >
+                                    <span class="contributors__avatar">
+                                        <img
+                                            class="contributors__pic"
+                                            src={c.avatar_url}
+                                            alt={c.login}
+                                            width="96"
+                                            height="96"
+                                            loading="lazy"
+                                        />
+                                        {c.login === "kayabaNerve" && (
+                                            <img
+                                                class="contributors__hat"
+                                                src="/img/classicdecoration.webp"
+                                                alt=""
+                                                aria-hidden="true"
+                                            />
+                                        )}
+                                    </span>
+                                    <span
+                                        class:list={[
+                                            "contributors__name",
+                                            {
+                                                "contributors__name--long":
+                                                    c.login.length > 12,
+                                            },
+                                        ]}
+                                    >
+                                        {c.login}
+                                    </span>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                    <a
+                        class="arrow-link"
+                        href="https://github.com/Cuprate/cuprate/graphs/contributors"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        ...and many more on GitHub
+                        <span class="arrow-link__arrow" aria-hidden="true">
+                            -&gt;
+                        </span>
+                    </a>
+                </>
+            ) : (
+                <a
+                    class="arrow-link"
+                    href="https://github.com/Cuprate/cuprate/graphs/contributors"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Meet all contributors on GitHub
+                    <span class="arrow-link__arrow" aria-hidden="true">
+                        -&gt;
+                    </span>
+                </a>
+            )
+        }
+    </div>
+</div>
+
+<style>
+    .contributors-band {
+        background: #070c12;
+        padding: 4.5rem 1rem 6rem;
+    }
+
+    .contributors-band__inner {
+        width: 90vw;
+        max-width: 1100px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .contributors__title {
+        font-family: "Atkinson", sans-serif;
+        font-weight: 700;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #e6edf3;
+        margin: 0 0 1.75rem;
+        text-shadow: 4px 4px 0 #000d8a;
+        text-align: center;
+    }
+
+    .contributors__dedication {
+        font-size: 1.15rem;
+        line-height: 1.6;
+        color: rgb(var(--gray));
+        max-width: 44rem;
+        margin: 0 auto 2.5rem;
+        text-align: center;
+    }
+
+    .contributors__grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.5rem;
+        list-style: none;
+        margin: 0 0 2rem;
+        padding: 0;
+    }
+
+    .contributors__grid li {
+        width: 8rem;
+        flex-shrink: 0;
+        display: flex;
+    }
+
+    .contributors__card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        gap: 0.75rem;
+        background: #010409;
+        border: 3px solid rgb(34, 41, 57);
+        padding: 1.25rem 0.75rem;
+        text-decoration: none;
+        transition:
+            transform 100ms steps(3),
+            box-shadow 100ms steps(3),
+            border-color 100ms steps(3);
+    }
+
+    .contributors__card:hover {
+        transform: translate(-4px, -4px);
+        border-color: #1e56cf;
+        box-shadow: 8px 8px 0 #1e56cf;
+    }
+
+    .contributors__avatar {
+        position: relative;
+        display: block;
+        width: 4.5rem;
+        height: 4.5rem;
+    }
+
+    .contributors__pic {
+        width: 4.5rem;
+        height: 4.5rem;
+        border: 3px solid #1e56cf;
+        display: block;
+    }
+
+    .contributors__hat {
+        position: absolute;
+        width: 105%;
+        top: -30%;
+        left: 20.5%;
+        opacity: 0;
+        transition: opacity 100ms steps(2);
+        pointer-events: none;
+    }
+
+    .contributors__name {
+        font-family: "Atkinson", sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        color: #e6edf3;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        text-align: center;
+    }
+
+    .contributors__name--long {
+        font-size: 0.68rem;
+        letter-spacing: 0.02em;
+    }
+
+    .contributors__card--glow:hover {
+        transform: translate(-4px, -4px);
+        border-color: #ff6ec7;
+        box-shadow:
+            8px 8px 0 #ff6ec7,
+            0 0 18px rgba(255, 110, 199, 0.55);
+    }
+
+    .contributors__card--glow:hover .contributors__pic {
+        border-color: #ff6ec7;
+    }
+
+    .contributors__card--glow:hover .contributors__name {
+        color: #ff9ed9;
+    }
+
+    .contributors__card--glow:hover .contributors__hat {
+        opacity: 1;
+    }
+</style>

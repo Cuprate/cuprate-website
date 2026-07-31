@@ -1,0 +1,43 @@
+---
+interface Props {
+	/** Color of the section above the divider (shows through the gaps). */
+	from: string;
+	/** Color of the section below the divider (the filled cells). */
+	to: string;
+	/** Number of alternating rows. */
+	rows?: number;
+}
+
+const { from, to, rows = 2 } = Astro.props;
+---
+
+<div
+	class="chessboard"
+	style={`background: ${from}; --cell-color: ${to}; --rows: ${rows};`}
+	aria-hidden="true"
+>
+	<div class="chessboard__row"></div>
+	{rows >= 2 && <div class="chessboard__row chessboard__row--offset"></div>}
+</div>
+
+<style>
+	.chessboard {
+		--cell: 4rem;
+		width: 100%;
+		height: calc(var(--cell) * var(--rows));
+		overflow: hidden;
+	}
+
+	.chessboard__row {
+		height: var(--cell);
+		background: repeating-linear-gradient(
+			90deg,
+			var(--cell-color) 0 var(--cell),
+			transparent var(--cell) calc(var(--cell) * 2)
+		);
+	}
+
+	.chessboard__row--offset {
+		background-position: var(--cell) 0;
+	}
+</style>

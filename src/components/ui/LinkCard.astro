@@ -1,0 +1,143 @@
+---
+interface Props {
+	title: string;
+	description: string;
+	href?: string;
+	badge?: string;
+	disabled?: boolean;
+}
+
+const { title, description, href, badge, disabled = false } = Astro.props;
+const Tag = disabled || !href ? "div" : "a";
+---
+
+<Tag
+	class:list={["link-card", { "link-card--disabled": disabled || !href }]}
+	href={!disabled && href ? href : undefined}
+	target={!disabled && href?.startsWith("http") ? "_blank" : undefined}
+	rel={!disabled && href?.startsWith("http") ? "noopener" : undefined}
+>
+	<div class="link-card__body">
+		<div class="link-card__heading">
+			{Astro.slots.has("icon") && (
+				<span class="link-card__icon">
+					<slot name="icon" />
+				</span>
+			)}
+			<h3 class="link-card__title">{title}</h3>
+			{badge && <span class="link-card__badge">{badge}</span>}
+		</div>
+		<p class="link-card__description">{description}</p>
+		<slot />
+	</div>
+	<span class="link-card__arrow" aria-hidden="true">
+		{disabled || !href ? "--" : "->"}
+	</span>
+</Tag>
+
+<style>
+	.link-card {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		background: #010409;
+		border: 3px solid rgb(34, 41, 57);
+		padding: 1.75rem 2rem;
+		text-decoration: none;
+		transition:
+			transform 100ms steps(3),
+			box-shadow 100ms steps(3),
+			border-color 100ms steps(3);
+	}
+
+	.link-card:hover {
+		transform: translate(-4px, -4px);
+		border-color: #1e56cf;
+		box-shadow: 8px 8px 0 #1e56cf;
+	}
+
+	.link-card--disabled,
+	.link-card--disabled:hover {
+		transform: none;
+		box-shadow: none;
+		border-color: rgb(34, 41, 57);
+		cursor: not-allowed;
+		opacity: 0.7;
+	}
+
+	.link-card__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.7rem;
+		height: 1.7rem;
+		color: #7d9bff;
+		flex-shrink: 0;
+	}
+
+	.link-card__icon :global(svg) {
+		width: 100%;
+		height: 100%;
+	}
+
+	.link-card__heading {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.9rem;
+		margin-bottom: 0.6rem;
+	}
+
+	.link-card__title {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 1.15rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		line-height: 1.4;
+		color: #e6edf3;
+		margin: 0;
+	}
+
+	.link-card__badge {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		font-size: 0.6rem;
+		text-transform: uppercase;
+		color: #0d1117;
+		background: #7d9bff;
+		padding: 0.45em 0.8em;
+		box-shadow: 3px 3px 0 #1e56cf;
+	}
+
+	.link-card__description {
+		font-size: 1rem;
+		line-height: 1.5;
+		color: rgb(var(--gray));
+		margin: 0;
+	}
+
+	.link-card__arrow {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 1.1rem;
+		color: rgb(var(--gray));
+		flex-shrink: 0;
+		transition:
+			transform 100ms steps(2),
+			color 100ms steps(2);
+	}
+
+	.link-card:hover .link-card__arrow {
+		transform: translateX(4px);
+		color: #7d9bff;
+	}
+
+	.link-card--disabled .link-card__arrow,
+	.link-card--disabled:hover .link-card__arrow {
+		transform: none;
+		color: rgb(var(--gray));
+	}
+</style>

@@ -1,0 +1,103 @@
+---
+const platforms = [
+	{ name: "Windows", icon: "/img/platforms/windows.avif" },
+	{ name: "macOS x86_64", icon: "/img/platforms/apple.avif" },
+	{ name: "macOS ARM", icon: "/img/platforms/apple.avif" },
+	{ name: "Linux GNU", icon: "/img/platforms/linux.avif" },
+	{ name: "Linux Musl", icon: "/img/platforms/linux.avif" },
+	{ name: "FreeBSD", icon: "/img/platforms/freebsd.avif" },
+	{ name: "OpenBSD", icon: "/img/platforms/openbsd.svg" },
+];
+---
+
+<div class="platform-card">
+	<h3 class="platform-card__title">Platform Support</h3>
+	<p class="platform-card__intro">
+		We support major as well as minor platforms.
+	</p>
+	<div class="platform-card__list">
+		{
+			platforms.map((p) => (
+				<div class="platform">
+					<span
+						class="platform__icon"
+						style={`--icon: url(${p.icon})`}
+						aria-hidden="true"
+					></span>
+					<span>{p.name}</span>
+				</div>
+			))
+		}
+
+	</div>
+</div>
+
+<style>
+	.platform-card {
+		background: #010409;
+		border: 3px solid rgb(34, 41, 57);
+		padding: 2rem;
+		transition:
+			transform 100ms steps(3),
+			box-shadow 100ms steps(3),
+			border-color 100ms steps(3);
+	}
+
+	.platform-card:hover {
+		transform: translate(-4px, -4px);
+		border-color: #1e56cf;
+		box-shadow: 8px 8px 0 #1e56cf;
+	}
+
+	.platform-card__title {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 1.15rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		line-height: 1.4;
+		color: #e6edf3;
+		margin: 0 0 0.75rem;
+	}
+
+	.platform-card__intro {
+		font-size: 1.05rem;
+		line-height: 1.6;
+		color: rgb(var(--gray));
+		margin: 0 0 1.75rem;
+	}
+
+	.platform-card__list {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 1.25rem 2.5rem;
+	}
+
+	.platform {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: 0.95rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: #e6edf3;
+	}
+
+	.platform__icon {
+		width: 1.6rem;
+		height: 1.6rem;
+		flex-shrink: 0;
+		background-color: #7d9bff;
+		mask-image: var(--icon);
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+		-webkit-mask-image: var(--icon);
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+	}
+</style>
