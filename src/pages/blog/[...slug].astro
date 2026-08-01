@@ -4,19 +4,25 @@ import BlogPost from "../../layouts/BlogPost.astro";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
+	const latestRelease = posts
+		.filter((p) => p.data.type === "release")
+		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())[0];
 
 	return posts.map((post) => ({
 		params: { slug: post.slug },
-		props: post,
+		props: { post, latestRelease: post.slug === latestRelease?.slug },
 	}));
 }
 
-type Props = CollectionEntry<"blog">;
+interface Props {
+	post: CollectionEntry<"blog">;
+	latestRelease: boolean;
+}
 
-const post = Astro.props;
+const { post, latestRelease } = Astro.props;
 const { Content } = await post.render();
 ---
 
-<BlogPost {...post.data}>
+<BlogPost {...post.data} latestRelease={latestRelease}>
 	<Content />
 </BlogPost>

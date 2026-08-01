@@ -5,6 +5,8 @@ interface Props {
 	badge?: string;
 	disabled?: boolean;
 	big?: boolean;
+	/** File downloads stay in the same tab (no `target="_blank"`). */
+	download?: boolean;
 }
 
 const {
@@ -13,6 +15,7 @@ const {
 	badge,
 	disabled = false,
 	big = false,
+	download = false,
 } = Astro.props;
 
 const Tag = disabled || !href ? "span" : "a";
@@ -25,8 +28,9 @@ const Tag = disabled || !href ? "span" : "a";
 		{ "pixel-btn--disabled": disabled, "pixel-btn--big": big },
 	]}
 	href={!disabled && href ? href : undefined}
-	target={!disabled && href?.startsWith("http") ? "_blank" : undefined}
-	rel={!disabled && href?.startsWith("http") ? "noopener" : undefined}
+	target={!disabled && !download && href?.startsWith("http") ? "_blank" : undefined}
+	rel={!disabled && !download && href?.startsWith("http") ? "noopener" : undefined}
+	download={!disabled && download ? "" : undefined}
 >
 	<slot />
 	{badge && <span class="pixel-btn__badge">{badge}</span>}
