@@ -159,6 +159,7 @@ const selectedLabelRules = `${builds
 	.platform-select {
 		appearance: none;
 		-webkit-appearance: none;
+		border-radius: 0;
 		min-width: 15rem;
 		font-family: "Atkinson", sans-serif;
 		font-weight: 700;
@@ -201,6 +202,8 @@ const selectedLabelRules = `${builds
 
 		.platform-select::picker(select) {
 			background: #010409;
+			/* base-select's UA style rounds the picker. */
+			border-radius: 0;
 			border: 3px solid rgb(34, 41, 57);
 			box-shadow: 8px 8px 0 rgba(1, 4, 9, 0.8);
 			padding: 0;
