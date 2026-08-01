@@ -1,29 +1,19 @@
 ---
-const platforms = [
-	{ name: "Windows", icon: "/img/platforms/windows.avif" },
-	{ name: "macOS x86_64", icon: "/img/platforms/apple.avif" },
-	{ name: "macOS ARM", icon: "/img/platforms/apple.avif" },
-	{ name: "Linux GNU", icon: "/img/platforms/linux.avif" },
-	{ name: "Linux Musl", icon: "/img/platforms/linux.avif" },
-	{ name: "FreeBSD", icon: "/img/platforms/freebsd.avif" },
-	{ name: "OpenBSD", icon: "/img/platforms/openbsd.svg" },
-];
+import Icon from "../ui/Icon.astro";
+import { platforms } from "../../data/platforms";
 ---
 
-<div class="platform-card">
+<div class="platform-card pixel-card">
 	<h3 class="platform-card__title">Platform Support</h3>
 	<p class="platform-card__intro">
 		We support major as well as minor platforms.
 	</p>
+	{/* Names only; architectures are on the releases page. */}
 	<div class="platform-card__list">
 		{
 			platforms.map((p) => (
 				<div class="platform">
-					<span
-						class="platform__icon"
-						style={`--icon: url(${p.icon})`}
-						aria-hidden="true"
-					/>
+					<Icon name={p.icon} size="1.6rem" color="#7d9bff" />
 					<span>{p.name}</span>
 				</div>
 			))
@@ -33,19 +23,7 @@ const platforms = [
 
 <style>
 	.platform-card {
-		background: #010409;
-		border: 3px solid rgb(34, 41, 57);
 		padding: 2rem;
-		transition:
-			transform 100ms steps(3),
-			box-shadow 100ms steps(3),
-			border-color 100ms steps(3);
-	}
-
-	.platform-card:hover {
-		transform: translate(-4px, -4px);
-		border-color: #1e56cf;
-		box-shadow: 8px 8px 0 #1e56cf;
 	}
 
 	.platform-card__title {
@@ -70,7 +48,7 @@ const platforms = [
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
-		gap: 1.25rem 2.5rem;
+		gap: 1rem 2.5rem;
 	}
 
 	.platform {
@@ -83,20 +61,5 @@ const platforms = [
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: #e6edf3;
-	}
-
-	.platform__icon {
-		width: 1.6rem;
-		height: 1.6rem;
-		flex-shrink: 0;
-		background-color: #7d9bff;
-		mask-image: var(--icon);
-		mask-size: contain;
-		mask-repeat: no-repeat;
-		mask-position: center;
-		-webkit-mask-image: var(--icon);
-		-webkit-mask-size: contain;
-		-webkit-mask-repeat: no-repeat;
-		-webkit-mask-position: center;
 	}
 </style>

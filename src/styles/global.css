@@ -231,6 +231,21 @@ main.full {
 	text-shadow: 4px 4px 0 #000d8a;
 }
 
+.pixel-card {
+	background: #010409;
+	border: 3px solid rgb(var(--gray-dark));
+	transition:
+		transform 100ms steps(3),
+		box-shadow 100ms steps(3),
+		border-color 100ms steps(3);
+}
+
+.pixel-card:hover {
+	transform: translate(-4px, -4px);
+	border-color: var(--accent);
+	box-shadow: 8px 8px 0 var(--accent);
+}
+
 .arrow-link {
 	display: inline-flex;
 	align-items: baseline;

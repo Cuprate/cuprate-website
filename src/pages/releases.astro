@@ -4,17 +4,12 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import PixelButton from "../components/ui/PixelButton.astro";
 import { SITE_TITLE } from "../consts";
+import { builds } from "../data/platforms";
+import Icon from "../components/ui/Icon.astro";
 
-const platforms = [
-	"Linux GNU x86_64",
-	"Linux Musl x86_64",
-	"Linux ARM",
-	"macOS x86_64",
-	"macOS ARM",
-	"Windows x86_64",
-	"FreeBSD x86_64",
-	"OpenBSD x86_64",
-];
+const selectedLabelRules = `${builds
+	.map((_, i) => `.download:has(#plat-${i}:checked) .dl-${i}`)
+	.join(",")}{display:inline}`;
 ---
 
 <!doctype html>
@@ -35,22 +30,27 @@ const platforms = [
 				<div class="download__cta">
 					<PixelButton big disabled badge="Sometime soon">
 						{
-							platforms.map((p, i) => (
+							builds.map((p, i) => (
 								<span class={`dl-label dl-${i}`}>Download for {p}</span>
 							))
 						}
 					</PixelButton>
 				</div>
 
-				<select class="platform-select" aria-label="Choose a platform">
-					{
-						platforms.map((p, i) => (
-							<option id={`plat-${i}`} value={i} selected={i === 0}>
-								{p}
-							</option>
-						))
-					}
-				</select>
+				<div class="select">
+					<select class="platform-select" aria-label="Choose a platform">
+						{
+							builds.map((p, i) => (
+								<option id={`plat-${i}`} value={i} selected={i === 0}>
+									{p}
+								</option>
+							))
+						}
+					</select>
+					<span class="select__caret">
+						<Icon name="chevron-down" size="1rem" />
+					</span>
+				</div>
 
 				<p class="download__meta">
 					<span>File size: <strong>not big</strong></span>
@@ -63,29 +63,7 @@ const platforms = [
 				<div class="split">
 					<div class="split__col">
 						<h2 class="split__title">
-							<svg
-								class="split__icon"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-								<path
-									d="M22 12.54c-1.804 -.345 -2.701 -1.08 -3.523 -2.94c-.487 .696 -1.102 1.568 -.92 2.4c.028 .238 -.32 1 -.557 1h-14c0 5.208 3.164 7 6.196 7c4.124 .022 7.828 -1.376 9.854 -5c1.146 -.101 2.296 -1.505 2.95 -2.46z"
-								></path>
-								<path d="M5 10h3v3h-3z"></path>
-								<path d="M8 10h3v3h-3z"></path>
-								<path d="M11 10h3v3h-3z"></path>
-								<path d="M8 7h3v3h-3z"></path>
-								<path d="M11 7h3v3h-3z"></path>
-								<path d="M11 4h3v3h-3z"></path>
-								<path d="M4.571 18c1.5 0 2.047 -.074 2.958 -.78"></path>
-								<path d="M10 16l0 .01"></path>
-							</svg>
+							<Icon name="docker" size="1.7rem" color="#7d9bff" />
 							Docker deployment
 						</h2>
 						<p>
@@ -105,23 +83,7 @@ const platforms = [
 					</div>
 					<div class="split__col">
 						<h2 class="split__title">
-							<svg
-								class="split__icon"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-								<path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0"></path>
-								<path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0"></path>
-								<path d="M3 6l0 13"></path>
-								<path d="M12 6l0 13"></path>
-								<path d="M21 6l0 13"></path>
-							</svg>
+							<Icon name="book" size="1.7rem" color="#7d9bff" />
 							Getting started
 						</h2>
 						<p>
@@ -145,6 +107,8 @@ const platforms = [
 		<Footer />
 	</body>
 </html>
+
+<style is:inline set:html={selectedLabelRules}></style>
 
 <style>
 	.download {
@@ -175,11 +139,27 @@ const platforms = [
 		margin-bottom: 1.5rem;
 	}
 
+	.select {
+		position: relative;
+		display: inline-block;
+		margin-bottom: 2rem;
+	}
+
+	/* Overlays the select, so clicks must fall through. */
+	.select__caret {
+		position: absolute;
+		right: 0.9rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		color: #7d9bff;
+		pointer-events: none;
+	}
+
 	.platform-select {
 		appearance: none;
 		-webkit-appearance: none;
 		min-width: 15rem;
-		margin-bottom: 2rem;
 		font-family: "Atkinson", sans-serif;
 		font-weight: 700;
 		font-size: 0.85rem;
@@ -187,10 +167,6 @@ const platforms = [
 		text-transform: uppercase;
 		padding: 0.75rem 2.6rem 0.75rem 1.1rem;
 		background-color: transparent;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d9bff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E");
-		background-repeat: no-repeat;
-		background-position: right 0.9rem center;
-		background-size: 1rem;
 		border: 1px dashed rgb(34, 41, 57);
 		color: #7d9bff;
 		cursor: pointer;
@@ -265,17 +241,6 @@ const platforms = [
 		display: none;
 	}
 
-	.download:has(#plat-0:checked) .dl-0,
-	.download:has(#plat-1:checked) .dl-1,
-	.download:has(#plat-2:checked) .dl-2,
-	.download:has(#plat-3:checked) .dl-3,
-	.download:has(#plat-4:checked) .dl-4,
-	.download:has(#plat-5:checked) .dl-5,
-	.download:has(#plat-6:checked) .dl-6,
-	.download:has(#plat-7:checked) .dl-7 {
-		display: inline;
-	}
-
 	.download__meta {
 		display: flex;
 		align-items: baseline;
@@ -303,13 +268,6 @@ const platforms = [
 	.split__col + .split__col {
 		border-left: 1px dashed rgb(34, 41, 57);
 		padding-left: 3rem;
-	}
-
-	.split__icon {
-		width: 1.7rem;
-		height: 1.7rem;
-		color: #7d9bff;
-		flex-shrink: 0;
 	}
 
 	.split__title {
