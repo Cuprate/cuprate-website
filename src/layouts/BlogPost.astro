@@ -1,7 +1,8 @@
 ---
 import Layout from "./Layout.astro";
 import "../styles/prose.css";
-import FormattedDate from '../components/layout/FormattedDate.astro';
+import FormattedDate from "../components/layout/FormattedDate.astro";
+import { release } from "../data/platforms";
 
 interface Props {
 	title: string;
@@ -9,9 +10,12 @@ interface Props {
 	pubDate: Date;
 	updatedDate?: Date;
 	heroImage?: string;
+	/** True on the newest `type: release` post only. */
+	latestRelease?: boolean;
 }
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, latestRelease } =
+	Astro.props;
 ---
 
 <Layout
@@ -31,12 +35,21 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			</a>
 			<div class="title">
 				<div>
-					<span class="date-chip">
-						<span class="date-chip__prefix">Date</span>
-						<span class="date-chip__date">
-							<FormattedDate date={pubDate} />
+					<div class="title__meta">
+						<span class="date-chip">
+							<span class="date-chip__prefix">Date</span>
+							<span class="date-chip__date">
+								<FormattedDate date={pubDate} />
+							</span>
 						</span>
-					</span>
+						{latestRelease && (
+							<a class="date-chip dl-chip" href="/releases">
+								<span class="date-chip__prefix">Download</span>
+								<span class="date-chip__date">{release.version}</span>
+								<span class="dl-chip__arrow" aria-hidden="true">-&gt;</span>
+							</a>
+						)}
+					</div>
 					{updatedDate && (
 						<div class="last-updated-on">
 							Last updated on <FormattedDate date={updatedDate} />
@@ -134,12 +147,20 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		border-top: 1px dashed rgb(34, 41, 57);
 	}
 
+	.title__meta {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-bottom: 1.75rem;
+	}
+
 	.date-chip {
 		display: inline-flex;
 		align-items: baseline;
 		gap: 0.6rem;
 		padding: 0.65rem 1rem;
-		margin-bottom: 1.75rem;
 		border: 1px dashed rgb(34, 41, 57);
 		font-family: 'Atkinson Hyperlegible', sans-serif;
 		font-weight: 700;
@@ -162,6 +183,34 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
 	.date-chip__date {
 		color: #e6edf3;
+	}
+
+	/* Link variant of the date chip, shown on the latest release post. */
+	.dl-chip {
+		text-decoration: none;
+		transition:
+			background-color 100ms steps(2),
+			border-color 100ms steps(2);
+	}
+
+	.dl-chip:hover,
+	.dl-chip:focus-visible {
+		background-color: rgba(30, 86, 207, 0.06);
+		border-color: rgba(30, 86, 207, 0.5);
+		outline: none;
+	}
+
+	.dl-chip__arrow {
+		color: rgb(var(--gray));
+		transition:
+			transform 100ms steps(2),
+			color 100ms steps(2);
+	}
+
+	.dl-chip:hover .dl-chip__arrow,
+	.dl-chip:focus-visible .dl-chip__arrow {
+		transform: translateX(4px);
+		color: #7d9bff;
 	}
 
 	.last-updated-on {

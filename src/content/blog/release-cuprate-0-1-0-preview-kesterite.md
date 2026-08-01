@@ -114,7 +114,7 @@ Some of their contributions include the introduction of a Dockerfile at the root
 
 As part of an architectural enhancement effort, the Cuprate node code has transitioned from a pure binary to be a fully working library as well. It is now possible to integrate one or multiple working Cuprate nodes into your application through our public Rust API.
 
-If you used cuprated 0.9.0, nothing changes for you as a user.
+If you used cuprated 0.0.9, nothing changes for you as a user.
 
 ### New website redesign
 

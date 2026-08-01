@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import PixelButton from "../components/ui/PixelButton.astro";
 import { SITE_TITLE } from "../consts";
-import { builds } from "../data/platforms";
+import { builds, release } from "../data/platforms";
 import Icon from "../components/ui/Icon.astro";
 import PageHeader from "../components/ui/PageHeader.astro";
 
@@ -24,21 +24,29 @@ const selectedLabelRules = `${builds
 		/>
 
 		<div class="download__cta">
-			<PixelButton big disabled badge="Sometime soon">
-				{
-					builds.map((p, i) => (
-						<span class={`dl-label dl-${i}`}>Download for {p}</span>
-					))
-				}
-			</PixelButton>
+			{
+				builds.map((b, i) => (
+					<span class={`dl-label dl-${i}`}>
+						<PixelButton
+							big
+							href={b.artifact?.url}
+							download={!!b.artifact}
+							disabled={!b.artifact}
+							badge={b.artifact ? release.version : "Sometime soon"}
+						>
+							Download for {b.label}
+						</PixelButton>
+					</span>
+				))
+			}
 		</div>
 
 		<div class="select">
 			<select class="platform-select" aria-label="Choose a platform">
 				{
-					builds.map((p, i) => (
+					builds.map((b, i) => (
 						<option id={`plat-${i}`} value={i} selected={i === 0}>
-							{p}
+							{b.label}
 						</option>
 					))
 				}
@@ -49,9 +57,21 @@ const selectedLabelRules = `${builds
 		</div>
 
 		<p class="download__meta">
-			<span>File size: <strong>not big</strong></span>
-			<span class="download__sep" aria-hidden="true">//</span>
-			<span>Release date: <strong>in 2 weeks</strong> (every 2 weeks)</span>
+			{
+				builds.map((b, i) => (
+					<>
+						<span class={`dl-label dl-${i}`}>
+							File size: <strong>{b.artifact?.size ?? "not big"}</strong>
+						</span>
+						<span class={`dl-label dl-${i} download__sep`} aria-hidden="true">{"//"}</span>
+						<span class={`dl-label dl-${i}`}>
+							Release date:{" "}
+							<strong>{b.artifact?.date ?? "in 2 weeks"}</strong>
+							{!b.artifact && " (every 2 weeks)"}
+						</span>
+					</>
+				))
+			}
 		</p>
 	</section>
 
@@ -148,7 +168,6 @@ const selectedLabelRules = `${builds
 		-webkit-appearance: none;
 		border-radius: 0;
 		min-width: 15rem;
-		margin-bottom: 2rem;
 		font-family: "Atkinson Hyperlegible", sans-serif;
 		font-weight: 700;
 		font-size: 0.85rem;
