@@ -1,185 +1,143 @@
 ---
-import BaseHead from "../components/layout/BaseHead.astro";
-import Header from "../components/layout/Header.astro";
-import Footer from "../components/layout/Footer.astro";
+import Layout from "../layouts/Layout.astro";
 import PixelButton from "../components/ui/PixelButton.astro";
 import { SITE_TITLE } from "../consts";
+import { builds } from "../data/platforms";
+import Icon from "../components/ui/Icon.astro";
+import PageHeader from "../components/ui/PageHeader.astro";
 
-const platforms = [
-	"Linux GNU x86_64",
-	"Linux Musl x86_64",
-	"Linux ARM",
-	"macOS x86_64",
-	"macOS ARM",
-	"Windows x86_64",
-	"FreeBSD x86_64",
-	"OpenBSD x86_64",
-];
+const selectedLabelRules = `${builds
+	.map((_, i) => `.download:has(#plat-${i}:checked) .dl-${i}`)
+	.join(",")}{display:inline}`;
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead
-			title={`Releases | ${SITE_TITLE}`}
-			description="Download Cuprate releases for your platform."
+<Layout
+	title={`Releases | ${SITE_TITLE}`}
+	description="Download Cuprate releases for your platform."
+	width="wide"
+>
+	<section class="download">
+		<PageHeader
+			title="Download Cuprate"
+			subtitle="Pre-built binaries for every platform."
+			centered
 		/>
-	</head>
-	<body>
-		<Header />
-		<main class="full">
-			<section class="section download">
-				<h1 class="page-title">Download Cuprate</h1>
-				<p class="download__sub">Pre-built binaries for every platform.</p>
 
-				<div class="download__cta">
-					<PixelButton big disabled badge="Sometime soon">
-						{
-							platforms.map((p, i) => (
-								<span class={`dl-label dl-${i}`}>Download for {p}</span>
-							))
-						}
-					</PixelButton>
-				</div>
+		<div class="download__cta">
+			<PixelButton big disabled badge="Sometime soon">
+				{
+					builds.map((p, i) => (
+						<span class={`dl-label dl-${i}`}>Download for {p}</span>
+					))
+				}
+			</PixelButton>
+		</div>
 
-				<select class="platform-select" aria-label="Choose a platform">
-					{
-						platforms.map((p, i) => (
-							<option id={`plat-${i}`} value={i} selected={i === 0}>
-								{p}
-							</option>
-						))
-					}
-				</select>
+		<div class="select">
+			<select class="platform-select" aria-label="Choose a platform">
+				{
+					builds.map((p, i) => (
+						<option id={`plat-${i}`} value={i} selected={i === 0}>
+							{p}
+						</option>
+					))
+				}
+			</select>
+			<span class="select__caret">
+				<Icon name="chevron-down" size="1rem" />
+			</span>
+		</div>
 
-				<p class="download__meta">
-					<span>File size: <strong>not big</strong></span>
-					<span class="download__sep" aria-hidden="true">//</span>
-					<span>Release date: <strong>in 2 weeks</strong> (every 2 weeks)</span>
+		<p class="download__meta">
+			<span>File size: <strong>not big</strong></span>
+			<span class="download__sep" aria-hidden="true">//</span>
+			<span>Release date: <strong>in 2 weeks</strong> (every 2 weeks)</span>
+		</p>
+	</section>
+
+	<section class="split-section">
+		<div class="split">
+			<div class="split__col">
+				<h2 class="split__title">
+					<Icon name="docker" size="1.7rem" color="#7d9bff" />
+					Docker deployment
+				</h2>
+				<p>
+					Cuprate can be deployed with Docker. The Dockerfile lives at the
+					root of the repository and builds a ready-to-run node image on
+					Alpine Linux.
 				</p>
-			</section>
+				<a
+					class="arrow-link"
+					href="https://github.com/Cuprate/cuprate/blob/main/Dockerfile"
+					target="_blank"
+					rel="noopener"
+				>
+					View the Dockerfile
+					<span class="arrow-link__arrow" aria-hidden="true">-&gt;</span>
+				</a>
+			</div>
+			<div class="split__col">
+				<h2 class="split__title">
+					<Icon name="book" size="1.7rem" color="#7d9bff" />
+					Getting started
+				</h2>
+				<p>
+					Once you have downloaded Cuprate, you will need to read the
+					documentation to learn how to configure and run your node
+					correctly.
+				</p>
+				<a
+					class="arrow-link"
+					href="https://user.cuprate.org"
+					target="_blank"
+					rel="noopener"
+				>
+					Read the documentation
+					<span class="arrow-link__arrow" aria-hidden="true">-&gt;</span>
+				</a>
+			</div>
+		</div>
+	</section>
+</Layout>
 
-			<section class="section">
-				<div class="split">
-					<div class="split__col">
-						<h2 class="split__title">
-							<svg
-								class="split__icon"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-								<path
-									d="M22 12.54c-1.804 -.345 -2.701 -1.08 -3.523 -2.94c-.487 .696 -1.102 1.568 -.92 2.4c.028 .238 -.32 1 -.557 1h-14c0 5.208 3.164 7 6.196 7c4.124 .022 7.828 -1.376 9.854 -5c1.146 -.101 2.296 -1.505 2.95 -2.46z"
-								></path>
-								<path d="M5 10h3v3h-3z"></path>
-								<path d="M8 10h3v3h-3z"></path>
-								<path d="M11 10h3v3h-3z"></path>
-								<path d="M8 7h3v3h-3z"></path>
-								<path d="M11 7h3v3h-3z"></path>
-								<path d="M11 4h3v3h-3z"></path>
-								<path d="M4.571 18c1.5 0 2.047 -.074 2.958 -.78"></path>
-								<path d="M10 16l0 .01"></path>
-							</svg>
-							Docker deployment
-						</h2>
-						<p>
-							Cuprate can be deployed with Docker. The Dockerfile lives at the
-							root of the repository and builds a ready-to-run node image on
-							Alpine Linux.
-						</p>
-						<a
-							class="arrow-link"
-							href="https://github.com/Cuprate/cuprate/blob/main/Dockerfile"
-							target="_blank"
-							rel="noopener"
-						>
-							View the Dockerfile
-							<span class="arrow-link__arrow" aria-hidden="true">-&gt;</span>
-						</a>
-					</div>
-					<div class="split__col">
-						<h2 class="split__title">
-							<svg
-								class="split__icon"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-								<path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0"></path>
-								<path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0"></path>
-								<path d="M3 6l0 13"></path>
-								<path d="M12 6l0 13"></path>
-								<path d="M21 6l0 13"></path>
-							</svg>
-							Getting started
-						</h2>
-						<p>
-							Once you have downloaded Cuprate, You will need to read
-							documentation to learn how to configure and run your node
-							correctly.
-						</p>
-						<a
-							class="arrow-link"
-							href="https://user.cuprate.org"
-							target="_blank"
-							rel="noopener"
-						>
-							Read the documentation
-							<span class="arrow-link__arrow" aria-hidden="true">-&gt;</span>
-						</a>
-					</div>
-				</div>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+<style is:inline set:html={selectedLabelRules}></style>
 
 <style>
 	.download {
-		padding: 5rem 1rem 4rem;
+		padding-bottom: 4rem;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
 
-	.page-title {
-		font-family: "Atkinson", sans-serif;
-		font-weight: 700;
-		font-size: clamp(1.6rem, 3.5vw, 2.5rem);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: #e6edf3;
-		margin: 0 0 1rem;
-	}
-
-	.download__sub {
-		font-size: 1.15rem;
-		color: rgb(var(--gray));
-		margin: 0 0 3rem;
-	}
-
 	.download__cta {
 		margin-bottom: 1.5rem;
+	}
+
+	.select {
+		position: relative;
+		display: inline-block;
+		margin-bottom: 2rem;
+	}
+
+	/* Overlays the select, so clicks must fall through. */
+	.select__caret {
+		position: absolute;
+		right: 0.9rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		color: #7d9bff;
+		pointer-events: none;
 	}
 
 	.platform-select {
 		appearance: none;
 		-webkit-appearance: none;
+		border-radius: 0;
 		min-width: 15rem;
-		margin-bottom: 2rem;
 		font-family: "Atkinson", sans-serif;
 		font-weight: 700;
 		font-size: 0.85rem;
@@ -187,10 +145,6 @@ const platforms = [
 		text-transform: uppercase;
 		padding: 0.75rem 2.6rem 0.75rem 1.1rem;
 		background-color: transparent;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d9bff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E");
-		background-repeat: no-repeat;
-		background-position: right 0.9rem center;
-		background-size: 1rem;
 		border: 1px dashed rgb(34, 41, 57);
 		color: #7d9bff;
 		cursor: pointer;
@@ -225,6 +179,8 @@ const platforms = [
 
 		.platform-select::picker(select) {
 			background: #010409;
+			/* base-select's UA style rounds the picker. */
+			border-radius: 0;
 			border: 3px solid rgb(34, 41, 57);
 			box-shadow: 8px 8px 0 rgba(1, 4, 9, 0.8);
 			padding: 0;
@@ -265,17 +221,6 @@ const platforms = [
 		display: none;
 	}
 
-	.download:has(#plat-0:checked) .dl-0,
-	.download:has(#plat-1:checked) .dl-1,
-	.download:has(#plat-2:checked) .dl-2,
-	.download:has(#plat-3:checked) .dl-3,
-	.download:has(#plat-4:checked) .dl-4,
-	.download:has(#plat-5:checked) .dl-5,
-	.download:has(#plat-6:checked) .dl-6,
-	.download:has(#plat-7:checked) .dl-7 {
-		display: inline;
-	}
-
 	.download__meta {
 		display: flex;
 		align-items: baseline;
@@ -294,6 +239,10 @@ const platforms = [
 		color: rgb(34, 41, 57);
 	}
 
+	.split-section {
+		padding-bottom: 2rem;
+	}
+
 	.split {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -303,13 +252,6 @@ const platforms = [
 	.split__col + .split__col {
 		border-left: 1px dashed rgb(34, 41, 57);
 		padding-left: 3rem;
-	}
-
-	.split__icon {
-		width: 1.7rem;
-		height: 1.7rem;
-		color: #7d9bff;
-		flex-shrink: 0;
 	}
 
 	.split__title {

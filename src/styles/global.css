@@ -70,14 +70,6 @@ body {
 	flex-direction: column;
 }
 
-main {
-	flex: 1 0 auto;
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
-}
-
 h1,
 h2,
 h3,
@@ -125,10 +117,6 @@ a:hover {
 
 p {
 	margin-bottom: 1em;
-}
-
-.prose p {
-	margin-bottom: 2em;
 }
 
 textarea {
@@ -181,10 +169,6 @@ hr {
 	body {
 		font-size: 16px;
 	}
-
-	main {
-		padding: 1em;
-	}
 }
 
 .sr-only {
@@ -206,13 +190,6 @@ hr {
 }
 
 /* Shared layout primitives */
-main.full {
-	width: 100%;
-	max-width: none;
-	margin: 0;
-	padding: 0;
-}
-
 .section {
 	width: 90vw;
 	max-width: 1100px;
@@ -229,6 +206,21 @@ main.full {
 	color: #e6edf3;
 	margin: 0 0 2.5rem;
 	text-shadow: 4px 4px 0 #000d8a;
+}
+
+.pixel-card {
+	background: #010409;
+	border: 3px solid rgb(var(--gray-dark));
+	transition:
+		transform 100ms steps(3),
+		box-shadow 100ms steps(3),
+		border-color 100ms steps(3);
+}
+
+.pixel-card:hover {
+	transform: translate(-4px, -4px);
+	border-color: var(--accent);
+	box-shadow: 8px 8px 0 var(--accent);
 }
 
 .arrow-link {

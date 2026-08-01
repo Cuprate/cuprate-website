@@ -1,0 +1,28 @@
+---
+import { getIcon } from "../../utils/icons";
+
+export interface Props {
+	/** Path under assets/icons, no extension, e.g. "platforms/linux". */
+	name: string;
+	size?: string;
+	color?: string;
+}
+
+const { name, size = "1em", color = "currentColor" } = Astro.props;
+
+const { src } = getIcon(name);
+---
+
+<div class="icon"></div>
+
+<style define:vars={{ size, src: `url(${src})`, color }}>
+	.icon {
+		display: inline-block;
+		flex-shrink: 0;
+		inline-size: var(--size);
+		block-size: var(--size);
+		background: var(--color);
+		mask: var(--src) no-repeat center / contain;
+		-webkit-mask: var(--src) no-repeat center / contain;
+	}
+</style>

@@ -1,64 +1,54 @@
 ---
-import BaseHead from "../../components/layout/BaseHead.astro";
-import Header from "../../components/layout/Header.astro";
-import Footer from "../../components/layout/Footer.astro";
+import Layout from "../../layouts/Layout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 import { getCollection } from "astro:content";
 import FormattedDate from "../../components/layout/FormattedDate.astro";
 import BlogRssCta from "../../components/blog/BlogRssCta.astro";
+import PageHeader from "../../components/ui/PageHeader.astro";
 
 const posts = (await getCollection("blog")).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<h1 class="section__title">Blog</h1>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.slug}/`}>
-									<img
-										width={720}
-										height={360}
-										src={post.data.heroImage}
-										alt=""
-									/>
-									<h4 class="title">{post.data.title}</h4>
-									<div class="meta">
-										<p class="date">
-											<FormattedDate date={post.data.pubDate} />
-										</p>
-										<span class="arrow" aria-hidden="true">
-											-&gt;
-										</span>
-									</div>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<BlogRssCta />
-		<Footer from="#070c12" />
-	</body>
-</html>
+<Layout
+	title={SITE_TITLE}
+	description={SITE_DESCRIPTION}
+	width="full"
+	footerFrom="#070c12"
+>
+	<section class="section">
+		<PageHeader title="Blog" subtitle="Development reports, meeting notes and announcements." />
+		<ul>
+			{
+				posts.map((post) => (
+					<li>
+						<a href={`/blog/${post.slug}/`}>
+							<img
+								width={720}
+								height={360}
+								src={post.data.heroImage}
+								alt=""
+							/>
+							<h4 class="title">{post.data.title}</h4>
+							<div class="meta">
+								<p class="date">
+									<FormattedDate date={post.data.pubDate} />
+								</p>
+								<span class="arrow" aria-hidden="true">
+									-&gt;
+								</span>
+							</div>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+	<BlogRssCta />
+</Layout>
 
 <style>
-	main {
-		width: 1100px;
-	}
-
 	ul {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);

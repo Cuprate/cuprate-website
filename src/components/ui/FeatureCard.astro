@@ -7,7 +7,7 @@ interface Props {
 const { title, description } = Astro.props;
 ---
 
-<div class="feature-card">
+<div class="feature-card pixel-card">
 	<div class="feature-card__icon">
 		<slot name="icon" />
 	</div>
@@ -20,19 +20,7 @@ const { title, description } = Astro.props;
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
-		background: #010409;
-		border: 3px solid rgb(34, 41, 57);
 		padding: 2rem;
-		transition:
-			transform 100ms steps(3),
-			box-shadow 100ms steps(3),
-			border-color 100ms steps(3);
-	}
-
-	.feature-card:hover {
-		transform: translate(-4px, -4px);
-		border-color: #1e56cf;
-		box-shadow: 8px 8px 0 #1e56cf;
 	}
 
 	.feature-card__icon {
@@ -45,25 +33,6 @@ const { title, description } = Astro.props;
 		background: #0d1117;
 		color: #7d9bff;
 		box-shadow: 4px 4px 0 rgba(30, 86, 207, 0.35);
-	}
-
-	.feature-card__icon :global(svg) {
-		width: 1.6rem;
-		height: 1.6rem;
-	}
-
-	.feature-card__icon :global(.icon-mask) {
-		width: 1.6rem;
-		height: 1.6rem;
-		background-color: currentColor;
-		mask-image: var(--icon);
-		mask-size: contain;
-		mask-repeat: no-repeat;
-		mask-position: center;
-		-webkit-mask-image: var(--icon);
-		-webkit-mask-size: contain;
-		-webkit-mask-repeat: no-repeat;
-		-webkit-mask-position: center;
 	}
 
 	.feature-card__title {
