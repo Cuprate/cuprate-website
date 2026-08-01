@@ -1,0 +1,72 @@
+---
+import BaseHead from "../components/layout/BaseHead.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	/**
+	 * Width of <main>. Omit for the default reading width. "full" is for pages
+	 * with full-bleed bands that manage their own section widths.
+	 */
+	width?: "full" | "wide" | "article";
+	/** Background of the last section, so the footer divider matches it. */
+	footerFrom?: string;
+}
+
+const { title, description, image, width, footerFrom } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} image={image} />
+	</head>
+	<body>
+		<Header />
+		<main class={width}>
+			<slot />
+		</main>
+		<Footer from={footerFrom} />
+	</body>
+</html>
+
+<style>
+	main {
+		flex: 1 0 auto;
+		width: 720px;
+		max-width: calc(100% - 2em);
+		margin: auto;
+		padding: 4rem 1em;
+	}
+
+	main.full {
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	/* A leading section supplies the gap that main.full gives up. */
+	main.full > :global(.section:first-child) {
+		padding-top: 4rem;
+	}
+
+	main.wide {
+		width: 1100px;
+	}
+
+	main.article {
+		width: calc(100% - 2em);
+		max-width: 100%;
+		margin: 0;
+	}
+
+	@media (max-width: 720px) {
+		main {
+			padding: 1em;
+		}
+	}
+</style>

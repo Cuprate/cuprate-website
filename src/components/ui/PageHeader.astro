@@ -1,0 +1,48 @@
+---
+interface Props {
+	title: string;
+	subtitle?: string;
+	centered?: boolean;
+}
+
+const { title, subtitle, centered = false } = Astro.props;
+---
+
+<header class="page-header" data-centered={centered || undefined}>
+	<h1 class="page-header__title">{title}</h1>
+	{subtitle && <p class="page-header__subtitle">{subtitle}</p>}
+</header>
+
+<style>
+	.page-header {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		margin-bottom: 3rem;
+	}
+
+	.page-header[data-centered] {
+		align-items: center;
+		text-align: center;
+	}
+
+	.page-header__title {
+		font-family: "Atkinson", sans-serif;
+		font-weight: 700;
+		font-size: clamp(1.8rem, 4vw, 2.75rem);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		line-height: 1.2;
+		margin: 0;
+		color: #e6edf3;
+		text-shadow: 4px 4px 0 #000d8a;
+	}
+
+	.page-header__subtitle {
+		font-size: 1.15rem;
+		line-height: 1.6;
+		color: rgb(var(--gray));
+		max-width: 34rem;
+		margin: 1rem 0 0;
+	}
+</style>

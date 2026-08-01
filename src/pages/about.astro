@@ -1,38 +1,40 @@
 ---
-import Layout from "../layouts/BlogPost.astro";
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/ui/PageHeader.astro";
+import "../styles/prose.css";
 ---
 
-<Layout
-	title="About Cuprate"
-	description="About Cuprate"
-	type="information"
->
-	<p>
-		Cuprate is an ongoing effort at implementing a fully functional <a
-			href="https://getmonero.org">Monero</a
-		> node in the <a href="https://rust-lang.org">Rust programming language</a>.
-	</p>
+<Layout title="About Cuprate" description="About Cuprate" width="article">
+	<div class="prose">
+		<PageHeader title="About Cuprate" />
 
-	<p>
-		The project's aim is to make an alternative implementation of Monero that is
-		performant, modern, and secure. It will contribute to node diversity and
-		resilience of the Monero network as whole against implementation
-		vulnerabilities. It will also be a new way for more contributors to help
-		Monero, hopefully extending the pool of developers working on Monero.
-	</p>
+		<p>
+			Cuprate is an ongoing effort at implementing a fully functional <a
+				href="https://getmonero.org">Monero</a
+			> node in the <a href="https://rust-lang.org">Rust programming language</a>.
+		</p>
 
-	<p class="center">
-		Cuprate wouldn't be possible without the Monero Community<br /> and the work of
-		its contributors:
-	</p>
+		<p>
+			The project's aim is to make an alternative implementation of Monero that
+			is performant, modern, and secure. It will contribute to node diversity and
+			resilience of the Monero network as whole against implementation
+			vulnerabilities. It will also be a new way for more contributors to help
+			Monero, hopefully extending the pool of developers working on Monero.
+		</p>
 
-	<a href="https://github.com/Cuprate/cuprate/graphs/contributors">
-		<img
-			class="contrib-graph"
-			src="https://contrib.rocks/image?repo=Cuprate/cuprate"
-			alt="Cuprate contributors graph"
-		/>
-	</a>
+		<p class="center">
+			Cuprate wouldn't be possible without the Monero Community<br /> and the work
+			of its contributors:
+		</p>
+
+		<a href="https://github.com/Cuprate/cuprate/graphs/contributors">
+			<img
+				class="contrib-graph"
+				src="https://contrib.rocks/image?repo=Cuprate/cuprate"
+				alt="Cuprate contributors graph"
+			/>
+		</a>
+	</div>
 </Layout>
 
 <style>
@@ -44,5 +46,6 @@ import Layout from "../layouts/BlogPost.astro";
 		display: block;
 		margin-left: auto;
 		margin-right: auto;
+		border: none;
 	}
 </style>
