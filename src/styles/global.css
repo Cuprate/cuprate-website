@@ -18,14 +18,6 @@
 }
 
 @font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-regular.woff") format("woff");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
 	font-family: "Inter";
 	src: url("/fonts/inter-variable.woff2") format("woff");
 	font-weight: 400;
@@ -42,10 +34,34 @@
 }
 
 @font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-bold.woff") format("woff");
+	font-family: "Atkinson Hyperlegible";
+	src: url("/fonts/AtkinsonHyperlegible-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("/fonts/AtkinsonHyperlegible-Bold.ttf") format("truetype");
 	font-weight: 700;
 	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("/fonts/AtkinsonHyperlegible-Italic.ttf") format("truetype");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("/fonts/AtkinsonHyperlegible-BoldItalic.ttf") format("truetype");
+	font-weight: 700;
+	font-style: italic;
 	font-display: swap;
 }
 
@@ -84,7 +100,7 @@ h3,
 h4,
 h5,
 h6 {
-	font-family: "Atkinson";
+	font-family: "Atkinson Hyperlegible";
 	margin: 0 0 0.5rem 0;
 	color: white;
 	line-height: 1.2;
@@ -129,6 +145,59 @@ p {
 
 .prose p {
 	margin-bottom: 2em;
+}
+
+.plot-fade {
+	-webkit-mask-image: linear-gradient(
+			to bottom,
+			transparent 0%,
+			black 15%,
+			black 85%,
+			transparent 100%
+		),
+		linear-gradient(
+			to right,
+			transparent 0%,
+			black 2%,
+			black 98%,
+			transparent 100%
+		);
+	mask-image: linear-gradient(
+			to bottom,
+			transparent 0%,
+			black 15%,
+			black 85%,
+			transparent 100%
+		),
+		linear-gradient(
+			to right,
+			transparent 0%,
+			black 2%,
+			black 98%,
+			transparent 100%
+		);
+	mask-composite: intersect;
+	-webkit-mask-composite: source-in;
+}
+
+.plot {
+	margin-bottom: 2em;
+}
+
+.plot-caption {
+	text-align: center;
+	color: rgba(var(--gray), 100%);
+	font-style: italic;
+	margin-top: 0.5em;
+	margin-bottom: 0;
+	padding-left: 3.25em;
+	padding-right: 2.5em;
+}
+
+.plot-fade img {
+	display: block;
+	width: 100%;
+	height: auto;
 }
 
 textarea {
@@ -177,6 +246,10 @@ hr {
 	border-top: 1px solid #30363d;
 }
 
+.prose > hr {
+	margin: 0 0 2.5rem;
+}
+
 @media (max-width: 720px) {
 	body {
 		font-size: 16px;
@@ -221,7 +294,7 @@ main.full {
 }
 
 .section__title {
-	font-family: "Atkinson", sans-serif;
+	font-family: "Atkinson Hyperlegible", sans-serif;
 	font-weight: 700;
 	font-size: clamp(1.4rem, 3vw, 2rem);
 	letter-spacing: 0.06em;
@@ -235,7 +308,7 @@ main.full {
 	display: inline-flex;
 	align-items: baseline;
 	gap: 0.6rem;
-	font-family: "Atkinson", sans-serif;
+	font-family: "Atkinson Hyperlegible", sans-serif;
 	font-weight: 700;
 	font-size: 0.9rem;
 	letter-spacing: 0.08em;
@@ -258,4 +331,111 @@ main.full {
 .arrow-link:hover .arrow-link__arrow {
 	transform: translateX(4px);
 	color: #7d9bff;
+}
+
+.plot-author {
+	color: #93a4bd;
+	border-left: 2px solid rgb(var(--gray-dark));
+	padding-left: 1em;
+	margin: 0 0 2em;
+}
+
+.plot-author .plot {
+	margin-left: -0.75em;
+}
+
+.plot-author__widget {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 1.5rem;
+	color: #e6edf3;
+}
+
+.plot-author__avatar {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	border: 1px solid rgb(34, 41, 57);
+}
+
+.plot-author__info {
+	display: flex;
+	flex-direction: column;
+}
+
+.plot-author__name {
+	font-family: "Atkinson Hyperlegible", sans-serif;
+	font-weight: 700;
+	font-size: 1.05rem;
+	line-height: 1.2;
+}
+
+.plot-author__role {
+	font-size: 0.8rem;
+	color: rgb(var(--gray));
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.metal-card {
+	border-top: 1px dashed rgb(34, 41, 57);
+	border-bottom: 1px dashed rgb(34, 41, 57);
+	padding: 1.5rem 0;
+	margin: 2.5rem 0;
+}
+
+.metal-card__label {
+	font-family: "Atkinson Hyperlegible", sans-serif;
+	font-weight: 700;
+	font-size: 0.85rem;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: #7d9bff;
+	margin-bottom: 1rem;
+}
+
+.metal-card__label::after {
+	content: "//";
+	margin-left: 1rem;
+	color: rgb(34, 41, 57);
+}
+
+.metal-card__body {
+	display: flex;
+	gap: 1.5rem;
+	align-items: flex-start;
+}
+
+.metal-card__image {
+	flex: 0 0 300px;
+	max-width: 40%;
+}
+
+.metal-card__image img {
+	width: 100%;
+	height: auto;
+	border-radius: 4px;
+	border: 1px dashed rgb(34, 41, 57);
+}
+
+.metal-card__text p {
+	margin-bottom: 1em;
+}
+
+.metal-card__source {
+	font-size: 0.8rem;
+	color: rgb(var(--gray));
+}
+
+@media (max-width: 720px) {
+	.metal-card__body {
+		flex-direction: column;
+	}
+
+	.metal-card__image {
+		flex: 0 0 auto;
+		width: 100%;
+		max-width: none;
+	}
 }
