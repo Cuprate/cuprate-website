@@ -1,5 +1,6 @@
 ---
 import ChessboardDivider from "../ui/ChessboardDivider.astro";
+import Icon from "../ui/Icon.astro";
 ---
 
 <ChessboardDivider from="#0d1117" to="#070c12" rows={1} />
@@ -21,11 +22,7 @@ import ChessboardDivider from "../ui/ChessboardDivider.astro";
 			<footer class="rss-band__attrib">- SyntheticBird45</footer>
 		</blockquote>
 		<a class="rss-band__link" href="/rss.xml" target="_blank" rel="noopener">
-			<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-				<path
-					d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9zM6.18 15.64a2.18 2.18 0 1 0 0 4.36 2.18 2.18 0 0 0 0-4.36z"
-				></path>
-			</svg>
+			<Icon name="rss" size="1.5rem" />
 			<span class="sr-only">Subscribe to the RSS feed</span>
 		</a>
 	</div>
@@ -119,8 +116,4 @@ import ChessboardDivider from "../ui/ChessboardDivider.astro";
 		color: #e6edf3;
 	}
 
-	.rss-band__link svg {
-		width: 1.5rem;
-		height: 1.5rem;
-	}
 </style>

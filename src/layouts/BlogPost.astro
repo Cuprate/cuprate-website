@@ -1,73 +1,55 @@
 ---
-import BaseHead from '../components/layout/BaseHead.astro';
-import Header from '../components/layout/Header.astro';
-import Footer from '../components/layout/Footer.astro';
+import Layout from "./Layout.astro";
+import "../styles/prose.css";
 import FormattedDate from '../components/layout/FormattedDate.astro';
 
 interface Props {
 	title: string;
 	description: string;
-	pubDate?: Date;
+	pubDate: Date;
 	updatedDate?: Date;
 	heroImage?: string;
-	type?: string;
 }
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-	</head>
-
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <img width={960} height={510} src={heroImage} alt="" />}
+<Layout
+	title={title}
+	description={description}
+	image={heroImage}
+	width="article"
+>
+	<article>
+		<div class="hero-image">
+			{heroImage && <img width={960} height={510} src={heroImage} alt="" />}
+		</div>
+		<div class="prose">
+			<a class="arrow-link" href="/blog">
+				<span class="arrow-link__arrow" aria-hidden="true">&lt;-</span>
+				Back to blog
+			</a>
+			<div class="title">
+				<div>
+					<span class="date-chip">
+						<span class="date-chip__prefix">Date</span>
+						<span class="date-chip__date">
+							<FormattedDate date={pubDate} />
+						</span>
+					</span>
+					{updatedDate && (
+						<div class="last-updated-on">
+							Last updated on <FormattedDate date={updatedDate} />
+						</div>
+					)}
 				</div>
-				<div class="prose">
-					{
-						pubDate && (
-							<a class="arrow-link" href="/blog">
-								<span class="arrow-link__arrow" aria-hidden="true">
-									&lt;-
-								</span>
-								Back to blog
-							</a>
-						)
-					}
-					<div class="title">
-						{
-							pubDate && (
-								<div>
-									<span class="date-chip">
-										<span class="date-chip__prefix">Date</span>
-										<span class="date-chip__date">
-											<FormattedDate date={pubDate} />
-										</span>
-									</span>
-									{updatedDate && (
-										<div class="last-updated-on">
-											Last updated on{" "}
-											<FormattedDate date={updatedDate} />
-										</div>
-									)}
-								</div>
-							)
-						}
-						<h1>{title}</h1>
-						<hr />
-					</div>
-					<slot />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+				<h1>{title}</h1>
+				<hr />
+			</div>
+			<slot />
+		</div>
+	</article>
+</Layout>
 
 <style>
 	main {

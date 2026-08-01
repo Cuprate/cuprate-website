@@ -1,4 +1,6 @@
 ---
+import Icon from "../ui/Icon.astro";
+
 const channels = [
 	{
 		name: "Matrix",
@@ -11,24 +13,10 @@ const channels = [
 ];
 ---
 
-<div class="community-bar">
+<div class="community-bar pixel-card">
 	<div class="community-bar__label">
 		<span class="community-bar__icon">
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-				<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-				<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
-				<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-				<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
-			</svg>
+			<Icon name="users" size="100%" />
 		</span>
 		<h3 class="community-bar__title">Community</h3>
 	</div>
@@ -52,19 +40,7 @@ const channels = [
 		align-items: center;
 		flex-wrap: wrap;
 		gap: 1.5rem;
-		background: #010409;
-		border: 3px solid rgb(34, 41, 57);
 		padding: 1.5rem 2rem;
-		transition:
-			transform 100ms steps(3),
-			box-shadow 100ms steps(3),
-			border-color 100ms steps(3);
-	}
-
-	.community-bar:hover {
-		transform: translate(-4px, -4px);
-		border-color: #1e56cf;
-		box-shadow: 8px 8px 0 #1e56cf;
 	}
 
 	.community-bar__label {
@@ -81,11 +57,6 @@ const channels = [
 		height: 1.7rem;
 		color: #7d9bff;
 		flex-shrink: 0;
-	}
-
-	.community-bar__icon svg {
-		width: 100%;
-		height: 100%;
 	}
 
 	.community-bar__title {

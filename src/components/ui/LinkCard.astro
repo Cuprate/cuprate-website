@@ -12,7 +12,7 @@ const Tag = href ? "a" : "div";
 ---
 
 <Tag
-	class:list={["link-card", { "link-card--disabled": disabled }]}
+	class:list={["link-card", "pixel-card", { "link-card--disabled": disabled }]}
 	href={!disabled && href ? href : undefined}
 	target={!disabled && href?.startsWith("http") ? "_blank" : undefined}
 	rel={!disabled && href?.startsWith("http") ? "noopener" : undefined}
@@ -43,20 +43,8 @@ const Tag = href ? "a" : "div";
 		align-items: center;
 		justify-content: space-between;
 		gap: 1.5rem;
-		background: #010409;
-		border: 3px solid rgb(34, 41, 57);
 		padding: 1.75rem 2rem;
 		text-decoration: none;
-		transition:
-			transform 100ms steps(3),
-			box-shadow 100ms steps(3),
-			border-color 100ms steps(3);
-	}
-
-	.link-card:hover {
-		transform: translate(-4px, -4px);
-		border-color: #1e56cf;
-		box-shadow: 8px 8px 0 #1e56cf;
 	}
 
 	.link-card--disabled,
@@ -76,11 +64,6 @@ const Tag = href ? "a" : "div";
 		height: 1.7rem;
 		color: #7d9bff;
 		flex-shrink: 0;
-	}
-
-	.link-card__icon :global(svg) {
-		width: 100%;
-		height: 100%;
 	}
 
 	.link-card__heading {
