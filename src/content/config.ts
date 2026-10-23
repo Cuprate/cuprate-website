@@ -10,6 +10,8 @@ const blog = defineCollection({
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		heroImage: z.string().optional(),
+		// GitHub login used for attribution
+		author: z.string().optional(),
 		type: z.string(),
 	}),
 });

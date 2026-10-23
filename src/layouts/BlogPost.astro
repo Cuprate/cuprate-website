@@ -1,6 +1,7 @@
 ---
 import Layout from "./Layout.astro";
 import "../styles/prose.css";
+import "katex/dist/katex.min.css";
 import FormattedDate from "../components/layout/FormattedDate.astro";
 import { release } from "../data/platforms";
 
@@ -10,11 +11,13 @@ interface Props {
 	pubDate: Date;
 	updatedDate?: Date;
 	heroImage?: string;
-	/** True on the newest `type: release` post only. */
+	/** GitHub login of the post author */
+	author?: string;
+	/** True on the newest release-type post only */
 	latestRelease?: boolean;
 }
 
-const { title, description, pubDate, updatedDate, heroImage, latestRelease } =
+const { title, description, pubDate, updatedDate, heroImage, author, latestRelease } =
 	Astro.props;
 ---
 
@@ -42,6 +45,21 @@ const { title, description, pubDate, updatedDate, heroImage, latestRelease } =
 								<FormattedDate date={pubDate} />
 							</span>
 						</span>
+						{author && (
+							<span class="date-chip author-chip">
+								<img
+									class="author-chip__avatar"
+									src={`https://github.com/${author}.png?size=48`}
+									alt=""
+									width={48}
+									height={48}
+									loading="lazy"
+									onerror="this.style.display='none'"
+								/>
+								<span class="date-chip__prefix">Author</span>
+								<span class="date-chip__date">{author}</span>
+							</span>
+						)}
 						{latestRelease && (
 							<a class="date-chip dl-chip" href="/releases">
 								<span class="date-chip__prefix">Download</span>
@@ -183,6 +201,20 @@ const { title, description, pubDate, updatedDate, heroImage, latestRelease } =
 
 	.date-chip__date {
 		color: #e6edf3;
+	}
+
+	/* Author variant of the date chip centering the avatar with the text */
+	.author-chip {
+		align-items: center;
+	}
+
+	/* Beats .prose img (0-1-1) so the avatar is round, not a dashed block. */
+	.prose .author-chip__avatar {
+		width: 28px;
+		height: 28px;
+		border: none;
+		border-radius: 50%;
+		outline: 1px solid rgb(34, 41, 57);
 	}
 
 	/* Link variant of the date chip, shown on the latest release post. */

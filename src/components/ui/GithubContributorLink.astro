@@ -1,0 +1,43 @@
+---
+interface Props {
+	/** GitHub login */
+	login: string;
+}
+
+const { login } = Astro.props;
+---
+
+<a
+	class="gh-contributor"
+	href={`https://github.com/${login}`}
+	target="_blank"
+	rel="noopener"
+><img
+		class="gh-contributor__avatar"
+		src={`https://github.com/${login}.png?size=32`}
+		alt=""
+		width="32"
+		height="32"
+		loading="lazy"
+	/>{login}</a>
+
+<style>
+	/* Inline contributor link with avatar inside prose text */
+	.gh-contributor {
+		white-space: nowrap;
+	}
+
+	/* Beats .prose img (0-1-1), so the avatar is
+	   round and text-sized instead of a dashed block. */
+	:global(.prose) .gh-contributor__avatar {
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+		margin-right: 0.35em;
+		border: none;
+		border-radius: 50%;
+		outline: 1px solid rgb(34, 41, 57);
+		/* Optical centering on the text baseline. */
+		vertical-align: -0.125em;
+	}
+</style>

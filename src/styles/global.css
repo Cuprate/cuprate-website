@@ -214,11 +214,12 @@ code {
 	padding: 2px 5px;
 	background-color: #23262f;
 	border-radius: 2px;
-	font-size: 18px;
+	/* Slightly smaller than surrounding text for better readability inline. */
+	font-size: 0.875em;
 }
 
 pre {
-	font-size: 17px;
+	font-size: 14.5px;
 	padding: 1.5em;
 	border-radius: 8px;
 }

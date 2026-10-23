@@ -1,0 +1,79 @@
+---
+interface Props {
+	/** Summary line shown on the collapsed header */
+	summary: string;
+	/** Number shown in the circle marker for the ordered variant */
+	n?: number;
+}
+
+const { summary, n } = Astro.props;
+---
+
+<details class="details-block">
+	<summary>
+		{
+			n !== undefined ? (
+				<span class="details-block__num" aria-hidden="true">
+					{n}
+				</span>
+			) : (
+				<span class="details-block__bullet" aria-hidden="true" />
+			)
+		}
+		<span class="details-block__summary" set:html={summary}></span>
+	</summary>
+	<slot />
+</details>
+
+<style>
+	.details-block {
+		border-left: 2px solid rgb(var(--gray-dark));
+		padding-left: 1em;
+		margin: 0 0 2em;
+	}
+
+	.details-block summary {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+		cursor: pointer;
+		color: #e6edf3;
+		font-family: "Atkinson Hyperlegible", sans-serif;
+		font-weight: 700;
+		font-size: 1.05rem;
+		line-height: 1.4;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	.details-block summary:hover {
+		color: #7d9bff;
+	}
+
+	.details-block__num,
+	.details-block__bullet {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75em;
+		height: 1.75em;
+		font-size: 0.85rem;
+		font-weight: 700;
+		border: 1px solid rgb(34, 41, 57);
+		color: #7d9bff;
+		flex-shrink: 0;
+	}
+
+	.details-block__num {
+		border-radius: 50%;
+	}
+
+	/* Unordered pixel square marker */
+	.details-block__bullet::before {
+		content: "";
+		width: 0.45em;
+		height: 0.45em;
+		background: #7d9bff;
+		box-shadow: 2px 2px 0 var(--accent);
+	}
+</style>
