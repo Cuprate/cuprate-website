@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import { render, type CollectionEntry, getCollection } from "astro:content";
 import BlogPost from "../../layouts/BlogPost.astro";
 
 export async function getStaticPaths() {
@@ -9,8 +9,8 @@ export async function getStaticPaths() {
 		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())[0];
 
 	return posts.map((post) => ({
-		params: { slug: post.slug },
-		props: { post, latestRelease: post.slug === latestRelease?.slug },
+		params: { slug: post.id },
+		props: { post, latestRelease: post.id === latestRelease?.id },
 	}));
 }
 
@@ -20,7 +20,7 @@ interface Props {
 }
 
 const { post, latestRelease } = Astro.props;
-const { Content } = await post.render();
+const { Content } = await render(post);
 ---
 
 <BlogPost {...post.data} latestRelease={latestRelease}>

@@ -11,7 +11,7 @@ const latest = posts[0];
 {
 	latest && (
 		<div class="latest">
-			<a class="latest__link" href={`/blog/${latest.slug}/`}>
+			<a class="latest__link" href={`/blog/${latest.id}/`}>
 				<span class="latest__label">Latest post</span>
 				<span class="latest__title">{latest.data.title}</span>
 				<span class="latest__date">
