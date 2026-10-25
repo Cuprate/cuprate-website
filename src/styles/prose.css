@@ -14,9 +14,17 @@
 	margin-bottom: 2em;
 }
 
+.prose p strong,
+.prose p b {
+	color: #dfe9f6;
+}
+
 .prose h2,
 .prose h3,
-.prose h4 {
+.prose h4,
+.prose h5,
+.prose h6 {
+	margin: 1.75em 0 0.75em;
 	font-family: "Atkinson", sans-serif;
 	letter-spacing: -0.01em;
 	color: #e6edf3;

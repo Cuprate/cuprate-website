@@ -1,0 +1,449 @@
+---
+title: "Turns out it is hard to secure a web server."
+description: "A technical blog post about the ongoing hardening of Cuprate's RPC server"
+pubDate: 'October 25 2026'
+heroImage: '/img/thumbnails/rpc-hardening.png'
+author: 'SyntheticBird45'
+type: 'technical'
+---
+
+import PullRequestCard from "../../components/ui/PullRequestCard.astro";
+import DetailsBlock from "../../components/ui/DetailsBlock.astro";
+import HackerOneLink from "../../components/ui/HackerOneLink.astro";
+import GithubContributorLink from "../../components/ui/GithubContributorLink.astro";
+
+The first of its kind technical blog post of this website. Two months have elapsed since Kesterite released and I wanted to share a little bit on the work I've been doing in this time with the help of
+<GithubContributorLink login="Boog900" /> and
+<GithubContributorLink login="redsh4de" />.
+
+This will also be the occasion to do some retrospection on some of Monero node's vulnerabilities.
+
+- [Introduction](#introduction)
+- [The state of things](#the-state-of-things)
+  - [Monerod](#monerod)
+    - [A few examples of HTTP violations](#a-few-examples-of-http-violations)
+    - [Vulnerabilities in the past](#vulnerabilities-in-the-past)
+    - [And now what.](#and-now-what)
+- [Cookbook on how to harass a web server](#cookbook-on-how-to-harass-a-web-server)
+- [Cuprate's mitigations](#cuprates-mitigations)
+  - [HTTP](#http)
+  - [Axum](#axum)
+  - [Timeouts](#timeouts)
+  - [Connection limits and ban](#connection-limits-and-ban)
+  - [Rate limiting](#rate-limiting)
+  - [Semaphore access](#semaphore-access)
+- [Conclusion](#conclusion)
+
+## Introduction
+
+If you are unfamiliar with how monero wallets work, this part is for you.
+
+The usage and operations of Monero can be distinguished into two separate groups of entities. There are wallets, and there are nodes. The nodes are the software that operate on the blockchain, enforce protocol, and interact with other peers. The Wallets are the software that act on your monero keys, scan transactions or create ones from their output. Without a wallet you can't use your monero, and without a monero node you can't interact with the Monero network.
+
+The global communications between monero nodes are what we usually call the Monero Peer to Peer network. Communications over this P2P network use the custom [Levin protocol](https://github.com/monero-project/monero/blob/master/docs/LEVIN_PROTOCOL.md) and encode their information using [epee's portable storage](https://github.com/monero-project/monero/blob/master/docs/PORTABLE_STORAGE.md).
+
+The communication from wallets to a node, is what we usually call [Remote-Procedure-Calling](https://en.wikipedia.org/wiki/Remote_procedure_call), or RPC. Wallets connect to a Monero node via the standard HTTP/1 protocol, the same you use for accessing any website, or that many applications use to get their informations from an "API". **This effectively makes your monero node, a web server.**
+
+One important difference with most web applications is that monerod does not provide a REST API, only an RPC endpoint. Both let you do or get things remotely but the architecture and scope are not the same. Monero respects (or at least tries to respect) the [JSON-RPC standard](https://www.jsonrpc.org/specification). This describes a remote procedure calling protocol based on JSON.
+
+Concretely, here is an example of a request your wallet sends to monerod when it wants to ping and the response it gets over the wire:
+
+##### Request
+```http
+POST /json_rpc HTTP/1.1
+Host: xmr-node.cakewallet.com:18081
+User-Agent: curl/8.21.0
+Accept: */*
+Content-Type: application/json
+Content-Length: 46
+
+{"jsonrpc":"2.0","id":"0","method":"get_info"}
+```
+
+##### Response
+```http
+HTTP/1.1 200 Ok
+Server: Epee-based
+Content-Length: 1434
+Content-Type: application/json
+Last-Modified: Sat, 15 Aug 2026 15:15:24 GMT
+Accept-Ranges: bytes
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "adjusted_time": 1786806704,
+    "alt_blocks_count": 0,
+    "block_size_limit": 600000,
+    "block_size_median": 300000,
+    "block_weight_limit": 600000,
+    "block_weight_median": 300000,
+    "bootstrap_daemon_address": "",
+    "busy_syncing": false,
+    "credits": 0,
+    "cumulative_difficulty": 676599043712687874,
+    "cumulative_difficulty_top64": 0,
+    "database_size": 289910292480,
+    "difficulty": 663687606283,
+    "difficulty_top64": 0,
+    "free_space": 18446744073709551615,
+    "grey_peerlist_size": 0,
+    "height": 3740764,
+    "height_without_bootstrap": 0,
+    "incoming_connections_count": 0,
+    "mainnet": true,
+    "nettype": "mainnet",
+    "offline": false,
+    "outgoing_connections_count": 0,
+    "restricted": true,
+    "rpc_connections_count": 0,
+    "stagenet": false,
+    "start_time": 0,
+    "status": "OK",
+    "synchronized": true,
+    "target": 120,
+    "target_height": 0,
+    "testnet": false,
+    "top_block_hash": "e9ee2a45d4f9fff8c835884df82e654a8d91da0ebfeb34474612f656f36c15aa",
+    "top_hash": "",
+    "tx_count": 62988992,
+    "tx_pool_size": 23,
+    "untrusted": false,
+    "update_available": false,
+    "version": "",
+    "was_bootstrap_ever_used": false,
+    "white_peerlist_size": 0,
+    "wide_cumulative_difficulty": "0x963c33ed7dd1f02",
+    "wide_difficulty": "0x9a86dd300b"
+  }
+}
+```
+
+This type of exchange is done continuously. When your wallet is syncing, it is actually sending these kinds of requests and getting responses that sometimes reach multiple dozens of megabytes in size.
+This is resource intensive for the node, and as such,
+
+##### **We need to secure it**.
+
+---
+
+## The state of things
+
+This hasn't escaped to the mind of anyone and as of writing several mitigations are already in place within monerod and more are work in progress in Cuprate. So let's do a tour of how things are at the moment.
+
+### Monerod
+
+Monerod's HTTP stack resides within the *cursed* [`contrib/epee`](https://github.com/monero-project/monero/tree/master/contrib/epee) folder. Much of the code in there predates the name of Monero and can be considered
+"legacy". Many vulnerabilities have emerged from code in this folder and [attempts have been made](https://github.com/monero-project/monero/pull/8970/changes) to modernize it, but the reviews still aren't there to go forward.
+
+The HTTP pipeline in particular can be considered archaic in that some technical choices are similar to naive implementation without any meaningful interest in correctness. For example, it is in clear violation of the HTTP standard protocol.
+
+##### **A few examples of HTTP violations**
+
+<DetailsBlock n={1} summary="Header parsing with regex state machines and method matched case-insensitive">
+
+In `contrib/epee/include/net/http_protocol_handler.inl`, header parsing is done with a regex state machine, parsing only what's interesting and adding an unnecessary complexity. The use of `regex::icase` also
+makes the match case-insensitive which is a violation of the [RFC 7231 §4.1](https://datatracker.ietf.org/doc/html/rfc7231#section-4.1):
+> The method token is case-sensitive because it might be
+   used as a gateway to object-based systems with case-sensitive method
+   names.
+```cpp
+static const boost::regex rexp_mach_field(
+	"\n?((Content-Disposition)|(Content-Type)"
+	//  12                     3 
+	"|([\\w-]+?)) ?: ?((.*?)(\r?\n))[^\t ]",	
+	//4               56    7 
+	boost::regex::icase | boost::regex::normal);
+```
+```cpp
+static const boost::regex rexp_match_command_line("^(((OPTIONS)|(GET)|(HEAD)|(POST)|(PUT)|(DELETE)|(TRACE)) (\\S+) HTTP/(\\d+)\\.(\\d+))\r?\n", boost::regex::icase | boost::regex::normal);
+  //                                            123         4     5      6      7     8        9        10          11     12
+```
+
+</DetailsBlock>
+
+<DetailsBlock n={2} summary="<code>Content-Length</code> parsing used to accept signed integers and accept duplicate headers">
+
+Up until two months ago, the `Content-Length` HTTP header that states the size of the body had no issues parsing signed integers (see [`07f7c7521`](https://github.com/monero-project/monero/commit/07f7c7521)).
+Moreover, we can perfectly duplicate this header as many times as we want and only the last one is counted. monerod should normally return a `400 Bad Request` response as per [RFC 7231 §3.3.2](https://datatracker.ietf.org/doc/html/rfc7231#section-3.3.2):
+> If a message is received without Transfer-Encoding and with
+       either multiple Content-Length header fields having differing
+       field-values or a single Content-Length header field having an
+       invalid value, then the message framing is invalid and the
+       recipient MUST treat it as an unrecoverable error.  If this is a
+       request message, the server MUST respond with a 400 (Bad Request)
+       status code and then close the connection.
+```cpp
+// pre 07f7c7521
+bool simple_http_connection_handler<t_connection_context>::get_len_from_content_lenght(const std::string& str, size_t& OUT len)
+{
+	static const boost::regex rexp_mach_field("\\d+", boost::regex::normal); // <- regex is fine reading signed integers.
+	std::string res;
+	boost::smatch result;
+	if(!(boost::regex_search( str, result, rexp_mach_field, boost::match_default) && result[0].matched))
+		return false;
+
+	try { len = boost::lexical_cast<size_t>(result[0]); } // <- This was then casted back as an unsigned integer.
+	catch(...) { return false; }
+	return true;
+}
+```
+```cpp
+template<class t_connection_context>
+	bool simple_http_connection_handler<t_connection_context>::parse_cached_header(http_header_info& body_info, const std::string& m_cache_to_process, size_t pos)
+	{
+		while(cur < pos)
+		{
+		const size_t line_end = m_cache_to_process.find('\n', cur);
+		...
+		boost::string_view name;
+			boost::string_view value;
+			if(!detail::parse_header_line(line, name, value))
+				return false;
+		
+			if(boost::iequals(name, "Connection"))
+				body_info.m_connection = std::string(value.data(), value.size());
+			else if(boost::iequals(name, "Referer"))
+				body_info.m_referer = std::string(value.data(), value.size());
+			else if(boost::iequals(name, "Content-Length"))
+				body_info.m_content_length = std::string(value.data(), value.size()); // <- Whenever it is read we just assign it.
+			...
+```
+
+</DetailsBlock>
+
+<DetailsBlock n={3} summary="The <code>Host</code> header is parsed and then completely ignored">
+
+Feeling suspicious today? You don't want to tell your monero node who this request is directed for huh? Well turns out you are lucky because monerod doesn't care about the `Host` header
+at all. Mark one, none or a hundred, it just doesn't care. [RFC 7231 §3.3.2](https://datatracker.ietf.org/doc/html/rfc7231#section-3.3.2):
+> A server MUST respond with a 400 (Bad Request) status code to any
+   HTTP/1.1 request message that lacks a Host header field and to any
+   request message that contains more than one Host header field or a
+   Host header field with an invalid field-value.
+```cpp
+template<class t_connection_context>
+	bool simple_http_connection_handler<t_connection_context>::parse_cached_header(http_header_info& body_info, const std::string& m_cache_to_process, size_t pos)
+	{
+		...
+			else if(boost::iequals(name, "Host"))
+				body_info.m_host = std::string(value.data(), value.size()); // <- We get it here and then we don't do anything about it.
+			...
+```
+
+</DetailsBlock>
+
+> "Meh, its not that important."
+
+Turns out it is. Take the `Content-Length` violation I described earlier. Without the 1MB IP-level restriction, anyone could just set `Content-Length: -1` and start sending TERABYTES of request body until the node's memory saturates.
+
+Weaknesses that aren't vulnerabilities by themselves can become ones when combined.
+
+##### Vulnerabilities in the past
+
+monerod [suffered](https://hackerone.com/reports/390499) [many](https://hackerone.com/reports/391611) [vulnerabilities](https://hackerone.com/reports/592094) [in](https://hackerone.com/reports/1379707) [its](https://hackerone.com/reports/1511843) [past](https://hackerone.com/reports/2677306) [through](https://hackerone.com/reports/2912194) [its](https://hackerone.com/reports/2338094) [JSON-RPC](https://hackerone.com/reports/3240792) [interface](https://hackerone.com/reports/3241102) [.](https://hackerone.com/reports/3307874) Naturally, as this constitutes monerod's largest attack surface, and one with accessible tooling given it is web-based.
+
+But we can divide these reports into two categories:
+- Handler bugs. These are vulnerabilities located into the function responsible for fulfilling the client request.
+- Stack bugs. These are vulnerabilities that are agnostic, or almost agnostic, to the function being called.
+
+Handler bugs can hardly be mitigated on a general basis, since they are specific to the logic or functions they front. Stack bugs on the other hand, in particular HTTP stack vulnerabilities, have been known since ancient times, and mitigations or implementation tips are public knowledge. Let's look at three of these stack vulnerabilities and draw some conclusions:
+
+1. <HackerOneLink href="https://hackerone.com/reports/1511843">Monero daemon does not limit Content-length variable when processing incoming HTTP requests.</HackerOneLink>
+
+As said earlier, `Content-Length` is the HTTP header defining the size of the body. Turns out monero was just allocating whatever this header was saying. So just send a big one and you make monerod allocate gigabytes of memory, which will kill it.
+
+As a remediation monerod implemented a 1MB limit on the HTTP request. Send more and you'll get disconnected.
+
+**Conclusion**: Never trust incoming data.
+
+2. <HackerOneLink href="https://hackerone.com/reports/2677306">Spamming highly nested JSON RPC requests cause node to disconnect from p2p network</HackerOneLink>
+
+Monerod implemented a throttling mechanism to avoid connections from causing high bandwidth for no valuable reasons. There was actually a bug in which the
+RPC traffic was accounted for P2P throttling, which under load would disconnect the node from P2P.
+
+The remediation was to unwire RPC from throttle unsurprisingly.
+
+**Conclusion**: Always have clear separation of concerns to avoid this. Or just give up on C++, that's also an option.
+
+3. <HackerOneLink href="https://hackerone.com/reports/2912194">Remote memory exhaustion in Epee RPC stack under zero Receive Window</HackerOneLink>
+
+This one is remarkable in its simplicity and damage it caused. After processing the client's request, monerod stored the HTTP response within a queue of bytes to be sent over the connection.
+This queue was unbounded, so you just had to send a lot of requests that generated heavy responses and let it grow out of control. Unlike what some might imagine, TCP actually wants you to wait for the receiver to be ready before sending bytes. So as the receiver you just have to never read from the connection, your operating system will buffer the node's responses up to a point, then start telling the node it has no space left. The node's operating system will itself acknowlege this and prevent monerod from flushing its responses down the socket, and will simply keep the data queued forever.
+
+As a fun fact, the vulnerability got leaked from the pull request meant to patch it, and one or a group of people actually shared an exploit on social media calling for monero to be attacked. If you ever came across [this reddit post on r/Monero](https://www.reddit.com/r/Monero/comments/1iqpebc/any_comments_on_this_vuln/), this is the one. Here's the first [report on oss-security of this exploit being published](https://www.openwall.com/lists/oss-security/2025/02/14/1) after [this primal note was published](https://primal.net/e/note1vzh0mj9rcxax9cgcdapupyxeehjprd68gd9kk9wrv939m8knulrs4780x7), and [the answer that followed from maintainers](https://www.openwall.com/lists/oss-security/2025/02/14/3). This caused several public nodes to suffer DoS attacks. They also disrupted the uptime of a seed node (a node hardcoded into monerod). Because of that, the vulnerability was assigned [CVE-2025-26819](https://nvd.nist.gov/vuln/detail/CVE-2025-26819).
+
+The remediation has been to bound the send queue and implement a connection limit system, capping the number of connections so the memory these send queues can consume stays bounded.
+
+**Conclusion**: Never trust peers to be cooperative at any point in time.
+
+### And now what.
+
+With that contextual and historical recall we can now assess the state of things for monerod:
+
+- Monerod original implementation of HTTP is completely crude.
+- On any "malformed" input, monerod immediately drops the connection without sending any response.
+- When receiving "valid" HTTP requests, it restricts their size and tries to not trust arbitrary inputs.
+- When sending a response, it also restricts the size of its send queue.
+- By default, an IP is allowed only a certain number of connections simultaneously.
+- There are some timeouts in place for inactive connections but they are ridiculously long:
+
+```cpp
+// Timeouts in Monero Fluorine Fermi 18.5.1
+#define AGGRESSIVE_TIMEOUT_THRESHOLD 120 // sockets 
+#define NEW_CONNECTION_TIMEOUT_LOCAL 1200000 // 20 minutes
+#define NEW_CONNECTION_TIMEOUT_REMOTE 10000 // 10 seconds 
+#define DEFAULT_TIMEOUT_MS_LOCAL 1800000 // 30 minutes 
+#define DEFAULT_TIMEOUT_MS_REMOTE 300000 // 5 minutes 
+```
+
+&nbsp;<br />
+This is honorable coverage and while it lets monero public nodes *survive* for now, I'm unsatisfied with the mitigations that have been chosen and with their details.
+
+## Cookbook on how to harass a web server
+
+To explain this, we'll first need to wash our hands and dip our arms into our ingredients list. That's right, **the ingredients to harass any self-implemented web server out there on the internet**. If you believe you have the soul of a web server cook, be prepared, it might be useful to you.
+
+The ingredients are the following:
+- Sending garbage instead of HTTP.
+- Sending a very long HTTP request. This one comes in 3 flavors:
+  - Sending a very long HTTP body.
+  - Sending a very long HTTP header.
+  - Sending a LOT of HTTP headers.
+- Disrespecting HTTP header statements in your body.*
+- Sending HTTP requests one byte at a time, very slowly.*
+- Reading HTTP responses one byte at a time very slowly, or not at all.*
+- Sending HTTP requests very quickly.*
+- Connecting 65535 times from the same IP address.
+- Connecting then doing nothing.
+- Connecting then disconnecting very very quickly.
+- Connecting from a lot of IP addresses at the same time.*
+- Sending bogus requests to fill logs with errors.*
+- Setting garbage in any component of the HTTP header.
+- Carefully crafting a request that costs a lot of resources to fulfill.*
+- Violate HTTP standard one way or another.*
+- BONUS: If the server supports TLS you can send cleartext in the middle.
+
+Don't forget you can **mix as much as you want at any point in time and in parallel** 🥣.
+
+All the ingredients that I have **marked with an asterisk** * are issues that **are either not solved or poorly mitigated by monerod**. Especially the memory usage under wallet load is a critical issue that forces some public node operator to assume that monerod can crash and that it needs to be restarted automatically. Other public nodes out there setup a reverse proxy like NGINX or Caddy and configure all the mitigations rather than relying on monerod by itself.
+
+## Cuprate's mitigations
+
+**I believe this situation sucks**, so when Kesterite got released and we started receiving reports about the lack of security on the RPC interface, I decided it was time to do everything NOW. Because of the project's main goal and some of us' familiarity with the vulnerabilities in monerod, we already had many mitigation ideas in mind for the RPC back in alpha. So I am going to enumerate all the mitigations we are implementing for the next update, how some of them differ from monerod, and what benefits they bring.
+
+### HTTP
+
+Cuprate is making use of the `hyper` crate, that emphasize on correctness to the HTTP standard protocol. In the Rust ecosystem it is considered a *blessed crate* and we're absolutely confident on its commitment to HTTP validations. By using it we eliminate the following ingredients:
+
+> ~Sending garbage instead of HTTP.~<br />
+> ~Setting garbage in any component of the HTTP header.~<br />
+> ~Violate HTTP standard one way or another.~<br />
+> ~Sending a very long HTTP header.~<br />
+> ~Sending a LOT of HTTP headers.~
+
+### Axum
+
+While `hyper` handles the low-level HTTP parsing and formatting, request handling is achieved using the `axum` framework. Just like `hyper`, `axum` is a well-known crate with full support for HTTP features. We coupled Axum's main `Router` with the `tower_http` crate's `RequestBodyLimitLayer` utility to limit the request body to 1MB. Using it we eliminate these remaining ingredients:
+
+> ~Disrespecting HTTP header statements in your body.~<br />
+> ~Sending a very long HTTP body.~
+
+### Timeouts
+
+<PullRequestCard url="https://github.com/Cuprate/cuprate/pull/675" />
+
+Back in February 2025, when the PR fixing the zero receive window DoS vulnerability was opened, we quickly understood it and discussed what mitigation would be appropriate. Cuprate, then in alpha with a limited RPC, was already not vulnerable to it because of how our HTTP stack, `hyper`, works. Request reading and response sending is asynchronous in monerod, while `hyper`'s HTTP/1 stack will not read the request if the response cannot be sent. But it would hold that state indefinitely.
+
+Our solution has been to introduce a short write timeout on the TCP socket. Responses are split into data frames and each frame has to be entirely sent within the write timeout period (5 seconds by default), otherwise we just drop the connection. We think this is a much more reliable and memory-efficient mitigation than monerod's decision to bound the send queue. Clients must be cooperative, otherwise it is meaningless to lose resources to them.
+
+But while this fixes the response side to a degree, we also need to mitigate the request side. For that we used `hyper`, which provides a `header_read_timeout` that awaits the ENTIRE header being sent within a period of time (30 seconds by default), and once that period passes the connection is dropped. We then limit body transfer using the `tower_http` crate's `RequestBodyDeadlineLayer`. We set a deadline (5 seconds by default) for the entire body to be received. After that delay the client receives a `400 Bad Request` response and the connection is dropped.
+
+With all these mitigations combined we mitigate these ingredients:
+
+> ~Sending HTTP requests one byte at a time, very slowly.~<br />
+> ~Reading HTTP responses one byte at a time very slowly, or not at all.~<br />
+> ~Connecting then doing nothing.~
+
+### Connection limits and ban
+
+<PullRequestCard url="https://github.com/Cuprate/cuprate/pull/684" />
+
+Limiting the number of connections an IP address can initiate is very important, as this increases greatly the cost of a network attack. The way it works in monerod is through a per IP limit of concurrency connections and a total maximum number of connections allowed simultaneously to the node. This is a fine mechanism by itself but I extended monerod's configuration with a loopback address limit and a list of IP addresses that are perfectly excluded from any type of IP limitations. The loopback addition comes from the assumption that people serving RPC over Tor might be using the tor daemon on the same machine as the node. If so is the case monerod would consider loopback as private so you'll have to increase it, however if you also serve on clearnet/internet this will cause an issue. So the granularity was needed. The excluded IP address list is for people still using reverse proxies or trusted clients.
+
+Here is an example snippet of `Cuprated.toml` with this new mitigation:
+```toml
+# Maximum amount of RPC connections allowed by a single public IP address.
+public_ip_connection_limit = 3
+# Maximum amount of RPC connections allowed by a single private IP address.
+private_ip_connection_limit = 25
+# Maximum amount of RPC connections allowed by a loopback address.
+loopback_connection_limit = 50
+# Maximum amount of RPC connections allowed globally.
+total_connection_limit = 100
+# The list of IP addresses that are excluded from all RPC connection limits.
+excluded_ips_connection_limit = ["10.0.14.1"]
+```
+
+For this purpose, I created a dedicated cache holding the connection state of every IP address actually connected to the RPC server. We named this cache `RpcLimitCache`. Thinking about other mitigations, I realized this was a good place to add a banning mechanism. To stop clients from causing errors on purpose at high speed, for example by sending garbage instead of HTTP, the solution is to allow only a specific number of failures. Past that threshold, we BAN the IP address and immediately drop new connections from it.
+
+This is an extremely effective countermeasure as IP addresses are allowed only 15 failures. The counter resets itself after 5 seconds, or is kept if another failure happened in the mean time. The ban period is 3 seconds.
+
+With these mechanisms we eliminated these remaining ingredients:
+> ~Connecting 65535 times from the same IP address.~<br />
+> ~Sending bogus requests to fill logs with errors.~<br />
+> ~Connecting from a lot of IP addresses at the same time.~<br />
+> ~Connecting then disconnecting very very quickly.~
+
+### Rate limiting
+
+<PullRequestCard url="https://github.com/Cuprate/cuprate/pull/685" />
+
+Very surprisingly, monerod, as a very resource-intensive daemon, does not have any form of rate limiting. Since Cuprate Kesterite we realized that we are so performant that the node is no longer the bottleneck, the wallet actually is. Consequently, simple block downloaders are able to draw many resources from us compared to a genuine monero wallet. This means that for the sake of public nodes and their wallet users, rate limiting needed to be implemented.
+
+However we didn't want to sacrifice on Cuprate performance for most users.
+
+After much discussion about which rate limiting algorithm to implement, <GithubContributorLink login="Boog900" /> proposed the following mechanism, so-named *size-time budget*.
+
+Each connection maintains two budgets, a response-size budget $B_S$ and a processing-time budget $B_T$, each initialised to its respective maximum $M_S$ and $M_T$. On every request, the response size $S$ and the processing time $T$ are measured, and the budgets are decremented accordingly:
+
+$$
+B_S \leftarrow B_S - S, \qquad B_T \leftarrow B_T - T.
+$$
+
+The budgets are signed integers, so a request that costs more than the remaining budget drives it below zero rather than clamping at zero. This punishes overshoot: the deeper the debt, the longer the connection must wait to recover before it can be served again.
+
+Rather than running a per-second ticker, the refill is computed lazily at each request from the time elapsed since the previous request was served. Let $\Delta t$ be that elapsed time. Each budget $B_X$ is refilled by its per-second income $I_X$, capped at its maximum $M_X$:
+
+$$
+B_X \leftarrow \min\!\left(B_X + I_X \cdot \Delta t,\ M_X\right), \qquad X \in \lbrace S, T \rbrace.
+$$
+
+A request is rejected with `429 Too Many Requests` as soon as either budget is exhausted:
+
+$$
+B_S \le 0 \quad \lor \quad B_T \le 0.
+$$
+
+This way cheap and easy requests can be served much faster while memory or cpu intensive requests are naturally limited. By doing this we also mechanically match the node's machine capacity, since processing time is directly correlated to the hardware. This has been implemented into a `RateLimitLayer` struct. The budgets and incomes are still configurable within `Cuprated.toml`.
+
+With this important feature we eliminate this remaining ingredient:
+
+> ~Sending HTTP requests very quickly.~
+
+### Semaphore access
+
+<PullRequestCard url="https://github.com/Cuprate/cuprate/pull/686" />
+
+Rate limiting alone does not protect against a burst of concurrent expensive requests, since each one may individually stay under its budget. To bound the amount of work the node does at once, we added a new limiting layer named `BlockSemaphoreLimitLayer` that caps how many requests to block endpoints (like `get_blocks.bin` or `get_blocks`) are processed simultaneously.
+
+Any additional request is put on hold for a configurable period of time. If that delay is exceeded, the request is dropped and the client receives a `503 Service Unavailable` response with a `Retry-After` header, telling it when it may try again. Wallets do not support that mechanism yet, but I'll work on making sure they will in the near future.
+
+As said earlier this is what will keep Cuprate public nodes alive under wallet load without relying on a systemd service rebooting it, as some providers have to do for monerod. In practice you must assume a single block request can consume up to 200MB of memory, so serving even a handful concurrently is enough to exhaust the node. The semaphore therefore bounds how many are processed at once and its capacity must be based on the total amount of memory available on the machine.
+
+With this feature we eliminate the last ingredient:
+
+> ~Carefully crafting a request that costs a lot of resources to fulfill.~
+
+## Conclusion
+
+Overall, this has been exciting to work on. I broke my sleep schedule in the process, but seeing Cuprate reach some maturity and having to battle on hardening for everyone to enjoy is rewarding. I'm really eager to see this live in the next update and people start deploying Cuprate public nodes.

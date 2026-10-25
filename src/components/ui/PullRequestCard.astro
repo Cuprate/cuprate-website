@@ -1,0 +1,177 @@
+---
+import { resolvePr, type PrState } from "../../utils/github";
+
+interface Props {
+	/** Full GitHub PR URL */
+	url: string;
+	/** Overrides the title fetched from the GitHub API. */
+	title?: string;
+	/** Overrides the state fetched from the GitHub API. */
+	state?: PrState;
+}
+
+const { url, title, state } = Astro.props;
+const pr = await resolvePr(url, { title, state });
+
+/* Octicons (MIT), https://primer.style/octicons */
+const PR_OPEN =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/></svg>';
+const PR_MERGED =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path d="M5.45 5.154A4.25 4.25 0 0 0 9.25 7.5h1.378a2.251 2.251 0 1 1 0 1.5H9.25A5.734 5.734 0 0 1 5 7.123v3.505a2.25 2.25 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.95-.218ZM4.25 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm8.5-4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM5 3.25a.75.75 0 1 0 0 .005V3.25Z"/></svg>';
+const PR_CLOSED =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path d="M3.25 1A2.25 2.25 0 0 1 4 5.372v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.251 2.251 0 0 1 3.25 1Zm9.5 5.5a.75.75 0 0 1 .75.75v3.378a2.251 2.251 0 1 1-1.5 0V7.25a.75.75 0 0 1 .75-.75Zm-2.03-5.273a.75.75 0 0 1 1.06 0l.97.97.97-.97a.748.748 0 0 1 1.265.332.75.75 0 0 1-.205.729l-.97.97.97.97a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-.97-.97-.97.97a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l.97-.97-.97-.97a.75.75 0 0 1 0-1.06ZM2.5 3.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0ZM3.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm9.5 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0 0-1.5Z"/></svg>';
+const PR_DRAFT =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path d="M3.25 1A2.25 2.25 0 0 1 4 5.372v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.251 2.251 0 0 1 3.25 1Zm9.5 14a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5ZM2.5 3.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0ZM3.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm9.5 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0 0-1.5ZM14 7.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Zm0-4.25a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg>';
+
+const ICONS: Record<PrState, string> = {
+	open: PR_OPEN,
+	merged: PR_MERGED,
+	closed: PR_CLOSED,
+	draft: PR_DRAFT,
+	unknown: PR_OPEN,
+};
+
+const LABELS: Record<PrState, string> = {
+	open: "Open",
+	merged: "Merged",
+	closed: "Closed",
+	draft: "Draft",
+	unknown: "Pull request",
+};
+---
+
+<a class:list={["pr-card", `pr-card--${pr.state}`]} href={url} target="_blank" rel="noopener">
+	<span class="pr-card__icon" aria-hidden="true" set:html={ICONS[pr.state]} />
+	<span class="pr-card__body">
+		<span class="pr-card__title">{pr.title}</span>
+		<span class="pr-card__meta">
+			{pr.owner}/{pr.repo}#{pr.number}
+			<span class="pr-card__state">{LABELS[pr.state]}</span>
+		</span>
+	</span>
+	<span class="pr-card__arrow" aria-hidden="true">-&gt;</span>
+</a>
+
+<style>
+	.pr-card {
+		/* Grey defaults for draft and unknown API states */
+		--pr-color: #8b949e;
+		--pr-bg: #8b949e;
+		--pr-bg-dark: #6e7681;
+
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		width: 50%;
+		min-width: 19rem;
+		max-width: 100%;
+		margin: 1em 0 2em;
+		padding: 0.55rem 1rem;
+		background: #010409;
+		border: 3px solid rgb(var(--gray-dark));
+		text-decoration: none;
+		transition:
+			transform 100ms steps(3),
+			box-shadow 100ms steps(3),
+			border-color 100ms steps(3);
+	}
+
+	.pr-card:hover {
+		transform: translate(-4px, -4px);
+		border-color: var(--pr-color);
+		box-shadow: 8px 8px 0 var(--pr-bg-dark);
+	}
+
+	.pr-card--open {
+		--pr-color: #3fb950;
+		--pr-bg: #2ea043;
+		--pr-bg-dark: #238636;
+	}
+
+	.pr-card--merged {
+		--pr-color: #a371f7;
+		--pr-bg: #8957e5;
+		--pr-bg-dark: #6f42c1;
+	}
+
+	.pr-card--closed {
+		--pr-color: #f85149;
+		--pr-bg: #da3633;
+		--pr-bg-dark: #b62324;
+	}
+
+	.pr-card__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		flex-shrink: 0;
+		background: var(--pr-bg);
+		color: #fff;
+		box-shadow: 3px 3px 0 var(--pr-bg-dark);
+	}
+
+	.pr-card__icon :global(svg) {
+		width: 1.05rem;
+		height: 1.05rem;
+	}
+
+	.pr-card__body {
+		min-width: 0;
+	}
+
+	.pr-card__title {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		font-family: "Atkinson Hyperlegible", sans-serif;
+		font-weight: 700;
+		font-size: 0.95rem;
+		line-height: 1.25;
+		color: #e6edf3;
+	}
+
+	.pr-card__meta {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: rgb(var(--gray));
+	}
+
+	.pr-card__state {
+		margin-left: 0.6em;
+		padding-left: 0.6em;
+		border-left: 2px solid rgb(var(--gray-dark));
+		color: var(--pr-color);
+	}
+
+	.pr-card__arrow {
+		margin-left: auto;
+		padding-left: 1rem;
+		font-family: "Atkinson Hyperlegible", sans-serif;
+		font-weight: 700;
+		font-size: 1.1rem;
+		color: rgb(var(--gray));
+		flex-shrink: 0;
+		transition:
+			transform 100ms steps(2),
+			color 100ms steps(2);
+	}
+
+	.pr-card:hover .pr-card__arrow {
+		transform: translateX(4px);
+		color: var(--pr-color);
+	}
+
+	@media (max-width: 720px) {
+		.pr-card {
+			width: 100%;
+			min-width: 0;
+		}
+	}
+</style>

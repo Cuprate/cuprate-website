@@ -1,0 +1,58 @@
+---
+interface Props {
+	/** Full HackerOne URL */
+	href: string;
+}
+
+const { href } = Astro.props;
+
+/* Simple Icons (CC0), hackerone glyph. */
+const H1_LOGO =
+	"M7.207 0c-.4836 0-.8774.1018-1.1823.3002-.3044.2003-.4592.4627-.4592.7798v21.809c0 .2766.1581.5277.4752.7609.315.2335.7031.3501 1.1664.3501.4427 0 .8306-.1166 1.1678-.3501.3352-.231.5058-.4843.5058-.761V1.0815c0-.319-.1623-.5769-.4893-.7813C8.0644.1018 7.6702 0 7.207 0zm9.5234 8.662c-.4836 0-.8717.0981-1.1683.3007l-4.439 2.7822c-.1988.1861-.2841.4687-.2473.855.0342.3826.2108.747.5238 1.0907.3145.346.6662.5626 1.0684.6547.3963.0899.6973.041.8962-.143l1.7551-1.0951v9.7817c0 .2767.1522.5278.4607.761.3007.2335.6873.3501 1.1504.3501.463 0 .863-.1166 1.1983-.3501.3371-.2332.5058-.4843.5058-.761V9.7381c0-.3193-.165-.577-.4898-.7754-.3252-.2026-.7288-.3007-1.2143-.3007z";
+---
+
+<a class="h1-link" href={href} target="_blank" rel="noopener">
+	<svg
+		class="h1-link__logo"
+		viewBox="0 0 24 24"
+		fill="currentColor"
+		role="img"
+		aria-label="HackerOne"
+	>
+		<path d={H1_LOGO}></path>
+	</svg>
+	<span class="h1-link__text"><slot /></span>
+</a>
+
+<style>
+	/* Same casing as the date/author chips at the top of blog posts.
+	   The global prose selector beats .prose a (0-1-1) so the text stays white. */
+	:global(.prose) .h1-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5em;
+		padding: 0.3em 0.7em;
+		border: 1px dashed rgb(34, 41, 57);
+		font-family: "Atkinson Hyperlegible", sans-serif;
+		font-weight: 700;
+		font-size: 0.95rem;
+		letter-spacing: 0.02em;
+		text-decoration: none;
+		color: #e6edf3;
+		transition:
+			border-color 100ms steps(2),
+			background-color 100ms steps(2);
+	}
+
+	:global(.prose) .h1-link:hover {
+		border-color: #e6edf3;
+		color: #e6edf3;
+		background: #010409;
+	}
+
+	.h1-link__logo {
+		width: 0.95em;
+		height: 0.95em;
+		flex-shrink: 0;
+	}
+</style>
